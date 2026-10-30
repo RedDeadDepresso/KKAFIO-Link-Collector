@@ -63,7 +63,11 @@ const setLinks = (links) => chrome.storage.local.set({ links });
 function canonicalPage(href) {
   try {
     const u = new URL(href, location.href);
-    return (site.page && site.page(u)) || site.match(u);
+    const base = (site.page && site.page(u)) || site.match(u);
+    if (!base) return null;
+    // keep the query string (filters, search terms, page numbers) for the
+    // floating button; some site rules strip it, others already include it
+    return base.includes("?") ? base : base + u.search;
   } catch { return null; }
 }
 
