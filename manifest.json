@@ -27,7 +27,13 @@
         "*://*.pawchive.pw/*",
         "*://koikatsucards.com/*",
         "*://*.koikatsucards.com/*",
-        "*://db.bepis.moe/*"
+        "*://db.bepis.moe/*",
+        "*://mega.nz/*",
+        "*://mega.co.nz/*",
+        "*://gofile.io/*",
+        "*://drive.google.com/*",
+        "*://catbox.moe/*",
+        "*://files.catbox.moe/*"
       ],
       "js": [
         "i18n.js",

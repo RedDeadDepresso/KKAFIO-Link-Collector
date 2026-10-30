@@ -56,6 +56,51 @@ const SITES = [
     // also put a button on ANY image-link to a same-site page (thumbnails)
     anyThumb: true,
   },
+  // ---- file hosts: only the floating button (no thumbnail buttons) ----
+  {
+    host: /(^|\.)mega\.(nz|co\.nz)$/,
+    match: () => null,
+    // /file/ID#KEY, /folder/ID#KEY[/folder/SUB] and legacy /#!ID!KEY, /#F!ID!KEY.
+    // The decryption key lives in the #hash, so it must be kept.
+    page: (u) => {
+      const ok = /^\/(file|folder)\/[^/?#]+\/?$/.test(u.pathname) || /^#F?!/.test(u.hash);
+      return ok ? u.origin + u.pathname + u.search + u.hash : null;
+    },
+  },
+  {
+    host: /(^|\.)gofile\.io$/,
+    match: () => null,
+    noSearch: true,
+    // /d/CONTENTID
+    page: (u) => {
+      const m = u.pathname.match(/^\/d\/[^/?#]+/);
+      return m ? u.origin + m[0] : null;
+    },
+  },
+  {
+    host: /^drive\.google\.com$/,
+    match: () => null,
+    noSearch: true,
+    // /file/d/ID/view, /drive/folders/ID (also /drive/u/0/folders/ID).
+    // Only the resourcekey param matters for access; usp=sharing etc. is dropped.
+    page: (u) => {
+      const m = u.pathname.match(/^\/(?:drive\/(?:u\/\d+\/)?folders\/[^/?#]+|file\/(?:u\/\d+\/)?d\/[^/?#]+)/);
+      if (!m) return null;
+      const rk = u.searchParams.get("resourcekey");
+      return u.origin + m[0] + (rk ? "?resourcekey=" + encodeURIComponent(rk) : "");
+    },
+  },
+  {
+    host: /(^|\.)catbox\.moe$/,
+    match: () => null,
+    noSearch: true,
+    // files.catbox.moe/abc123.ext (direct file) and catbox.moe/c/ID (collection)
+    page: (u) => {
+      if (u.hostname === "files.catbox.moe" && /^\/[^/]+\.[a-z0-9]+$/i.test(u.pathname)) return u.origin + u.pathname;
+      if (/^\/c\/[^/?#]+/.test(u.pathname)) return u.origin + u.pathname;
+      return null;
+    },
+  },
 ];
 // ========================================================================
 
@@ -74,6 +119,7 @@ function canonicalPage(href) {
     if (!base) return null;
     // keep the query string (filters, search terms, page numbers) for the
     // floating button; some site rules strip it, others already include it
+    if (site.noSearch) return base; // the site's rule already decided what to keep
     return base.includes("?") ? base : base + u.search;
   } catch { return null; }
 }

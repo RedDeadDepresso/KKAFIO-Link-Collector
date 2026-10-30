@@ -13,7 +13,7 @@ const ALLOWED_DOMAINS = [
   "mega.co.nz",
   "drive.google.com",
   "drive.usercontent.google.com",
-  "files.catbox.moe",
+  "catbox.moe",
 ];
 
 function isAllowed(url) {

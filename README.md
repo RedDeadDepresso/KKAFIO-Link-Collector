@@ -21,9 +21,13 @@ Everything is stored locally in your browser. The extension makes no network req
 | pawchive.pw | ✅ `/SERVICE/user/ID` and `/SERVICE/user/ID/post/ID` | ✅ |
 | koikatsucards.com | ✅ (any image link; see notes) | ✅ |
 | db.bepis.moe | ✅ `/GAME/view/ID` | ✅ |
+| mega.nz | ✅ floating button on `/file/…#key`, `/folder/…#key` | ✅ |
+| gofile.io | ✅ floating button on `/d/ID` | ✅ |
+| drive.google.com | ✅ floating button on files and folders | ✅ |
+| catbox.moe | ✅ floating button on `files.catbox.moe/…` and `/c/ID` | ✅ |
 | any other site | – | ✅ for allowed domains only |
 
-Right-click extraction keeps only links on these domains (and their subdomains): `pixiv.net`, `pawchive.pw`, `koikatsucards.com`, `bepis.moe`, `gofile.io`, `mega.nz`, `mega.io`, `mega.co.nz`, `drive.google.com`, `drive.usercontent.google.com`, `files.catbox.moe`.
+Right-click extraction keeps only links on these domains (and their subdomains): `pixiv.net`, `pawchive.pw`, `koikatsucards.com`, `bepis.moe`, `gofile.io`, `mega.nz`, `mega.io`, `mega.co.nz`, `drive.google.com`, `drive.usercontent.google.com`, `catbox.moe`.
 
 ## Installation
 
