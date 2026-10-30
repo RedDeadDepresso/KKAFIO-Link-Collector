@@ -1,0 +1,53 @@
+{
+  "extName": {
+    "message": "KKAFIO Link Collector"
+  },
+  "extDescription": {
+    "message": "Pixiv, Pawchive 등의 게시물에 수집 버튼을 추가하고, 수집한 링크를 한 번에 복사할 수 있습니다."
+  },
+  "menuExtract": {
+    "message": "KKAFIO Link Collector로 링크 추출"
+  },
+  "collected": {
+    "message": "수집됨:"
+  },
+  "copyAll": {
+    "message": "모두 복사"
+  },
+  "copyClear": {
+    "message": "복사 후 비우기"
+  },
+  "clearAll": {
+    "message": "비우기"
+  },
+  "copiedN": {
+    "message": "$COUNT$개 복사됨",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "nothingToCopy": {
+    "message": "복사할 항목이 없습니다"
+  },
+  "confirmClear": {
+    "message": "수집한 링크를 모두 삭제할까요?"
+  },
+  "removeTitle": {
+    "message": "삭제"
+  },
+  "collectBtnTitle": {
+    "message": "링크 수집"
+  },
+  "collectFloat": {
+    "message": "+ 링크 수집"
+  },
+  "collectedFloat": {
+    "message": "✓ 수집됨"
+  },
+  "badgeDup": {
+    "message": "중복"
+  }
+}

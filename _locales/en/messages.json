@@ -1,0 +1,53 @@
+{
+  "extName": {
+    "message": "KKAFIO Link Collector"
+  },
+  "extDescription": {
+    "message": "Adds a collect button to posts on Pixiv, Pawchive and more, and lets you copy all collected links."
+  },
+  "menuExtract": {
+    "message": "Extract links with KKAFIO Link Collector"
+  },
+  "collected": {
+    "message": "Collected:"
+  },
+  "copyAll": {
+    "message": "Copy all"
+  },
+  "copyClear": {
+    "message": "Copy & clear"
+  },
+  "clearAll": {
+    "message": "Clear"
+  },
+  "copiedN": {
+    "message": "Copied $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "nothingToCopy": {
+    "message": "Nothing to copy"
+  },
+  "confirmClear": {
+    "message": "Remove all collected links?"
+  },
+  "removeTitle": {
+    "message": "Remove"
+  },
+  "collectBtnTitle": {
+    "message": "Collect link"
+  },
+  "collectFloat": {
+    "message": "+ Collect link"
+  },
+  "collectedFloat": {
+    "message": "✓ Collected"
+  },
+  "badgeDup": {
+    "message": "dup"
+  }
+}

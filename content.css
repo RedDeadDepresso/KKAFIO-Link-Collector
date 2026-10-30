@@ -1,0 +1,14 @@
+#lc-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 2147483646; }
+.lc-btn {
+  position: absolute; top: 6px; left: 6px; z-index: 9999; pointer-events: auto;
+  width: 28px; height: 28px; border-radius: 50%; border: none; cursor: pointer;
+  background: rgba(0,0,0,.65); color: #fff; font: 700 16px/28px sans-serif;
+  text-align: center; padding: 0; opacity: .85; transition: transform .1s, background .1s;
+}
+.lc-btn:hover { opacity: 1; transform: scale(1.1); }
+.lc-btn.lc-on { background: #1fa855; }
+.lc-float {
+  position: fixed; top: auto; left: auto; right: 20px; bottom: 20px;
+  width: auto; height: auto; border-radius: 20px; padding: 8px 14px;
+  font: 600 14px/1 sans-serif; z-index: 2147483647;
+}

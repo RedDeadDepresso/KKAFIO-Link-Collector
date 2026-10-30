@@ -1,0 +1,53 @@
+{
+  "extName": {
+    "message": "KKAFIO Link Collector"
+  },
+  "extDescription": {
+    "message": "在 Pixiv、Pawchive 等站点的作品上添加收集按钮，并可一键复制所有已收集的链接。"
+  },
+  "menuExtract": {
+    "message": "使用 KKAFIO Link Collector 提取链接"
+  },
+  "collected": {
+    "message": "已收集："
+  },
+  "copyAll": {
+    "message": "全部复制"
+  },
+  "copyClear": {
+    "message": "复制并清空"
+  },
+  "clearAll": {
+    "message": "清空"
+  },
+  "copiedN": {
+    "message": "已复制 $COUNT$ 个",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "nothingToCopy": {
+    "message": "没有可复制的内容"
+  },
+  "confirmClear": {
+    "message": "要删除所有已收集的链接吗？"
+  },
+  "removeTitle": {
+    "message": "删除"
+  },
+  "collectBtnTitle": {
+    "message": "收集链接"
+  },
+  "collectFloat": {
+    "message": "+ 收集链接"
+  },
+  "collectedFloat": {
+    "message": "✓ 已收集"
+  },
+  "badgeDup": {
+    "message": "重复"
+  }
+}

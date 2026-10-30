@@ -1,0 +1,10 @@
+body { width: 380px; font: 13px sans-serif; margin: 0; padding: 10px; }
+.top { display: flex; justify-content: space-between; margin-bottom: 8px; }
+#msg { color: #1fa855; }
+.actions { display: flex; gap: 6px; margin-bottom: 8px; }
+.actions button { flex: 1; padding: 6px; cursor: pointer; }
+.danger { color: #c0392b; }
+ul { list-style: none; margin: 0; padding: 0; max-height: 300px; overflow-y: auto; }
+li { display: flex; align-items: center; gap: 6px; padding: 4px 0; border-top: 1px solid #ddd; }
+li a { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: inherit; }
+li button { border: none; background: none; cursor: pointer; font-size: 14px; }

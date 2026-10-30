@@ -1,0 +1,53 @@
+{
+  "extName": {
+    "message": "KKAFIO Link Collector"
+  },
+  "extDescription": {
+    "message": "Добавляет кнопку сбора на публикации Pixiv, Pawchive и других сайтов и позволяет скопировать все собранные ссылки."
+  },
+  "menuExtract": {
+    "message": "Извлечь ссылки с помощью KKAFIO Link Collector"
+  },
+  "collected": {
+    "message": "Собрано:"
+  },
+  "copyAll": {
+    "message": "Копировать все"
+  },
+  "copyClear": {
+    "message": "Копировать и очистить"
+  },
+  "clearAll": {
+    "message": "Очистить"
+  },
+  "copiedN": {
+    "message": "Скопировано: $COUNT$",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "nothingToCopy": {
+    "message": "Нечего копировать"
+  },
+  "confirmClear": {
+    "message": "Удалить все собранные ссылки?"
+  },
+  "removeTitle": {
+    "message": "Удалить"
+  },
+  "collectBtnTitle": {
+    "message": "Собрать ссылку"
+  },
+  "collectFloat": {
+    "message": "+ Собрать ссылку"
+  },
+  "collectedFloat": {
+    "message": "✓ Собрано"
+  },
+  "badgeDup": {
+    "message": "дубл."
+  }
+}

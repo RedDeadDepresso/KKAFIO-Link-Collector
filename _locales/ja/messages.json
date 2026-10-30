@@ -1,0 +1,53 @@
+{
+  "extName": {
+    "message": "KKAFIO Link Collector"
+  },
+  "extDescription": {
+    "message": "Pixiv や Pawchive などの投稿に収集ボタンを追加し、集めたリンクをまとめてコピーできます。"
+  },
+  "menuExtract": {
+    "message": "KKAFIO Link Collector でリンクを抽出"
+  },
+  "collected": {
+    "message": "収集済み："
+  },
+  "copyAll": {
+    "message": "すべてコピー"
+  },
+  "copyClear": {
+    "message": "コピーして消去"
+  },
+  "clearAll": {
+    "message": "消去"
+  },
+  "copiedN": {
+    "message": "$COUNT$ 件コピーしました",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "5"
+      }
+    }
+  },
+  "nothingToCopy": {
+    "message": "コピーするものがありません"
+  },
+  "confirmClear": {
+    "message": "収集したリンクをすべて削除しますか？"
+  },
+  "removeTitle": {
+    "message": "削除"
+  },
+  "collectBtnTitle": {
+    "message": "リンクを収集"
+  },
+  "collectFloat": {
+    "message": "+ リンクを収集"
+  },
+  "collectedFloat": {
+    "message": "✓ 収集済み"
+  },
+  "badgeDup": {
+    "message": "重複"
+  }
+}
