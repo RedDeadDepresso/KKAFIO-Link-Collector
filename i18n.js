@@ -2,7 +2,7 @@
 // falls back to the built-in English text so the UI never goes blank.
 const KKAFIO_FALLBACK = {
   "extName": "KKAFIO Link Collector",
-  "extDescription": "Adds a collect button to posts on Pixiv, Pawchive and more, and lets you copy all collected links.",
+  "extDescription": "Collect buttons for Pixiv, Pawchive, Bepis & koikatsucards.com; extract Gofile/Mega/Drive/Catbox links from selected text; copy all.",
   "menuExtract": "Extract links with KKAFIO Link Collector",
   "collected": "Collected:",
   "copyAll": "Copy all",

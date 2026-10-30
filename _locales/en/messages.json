@@ -3,7 +3,7 @@
     "message": "KKAFIO Link Collector"
   },
   "extDescription": {
-    "message": "Adds a collect button to posts on Pixiv, Pawchive and more, and lets you copy all collected links."
+    "message": "Collect buttons for Pixiv, Pawchive, Bepis & koikatsucards.com; extract Gofile/Mega/Drive/Catbox links from selected text; copy all."
   },
   "menuExtract": {
     "message": "Extract links with KKAFIO Link Collector"

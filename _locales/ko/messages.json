@@ -3,7 +3,7 @@
     "message": "KKAFIO Link Collector"
   },
   "extDescription": {
-    "message": "Pixiv, Pawchive 등의 게시물에 수집 버튼을 추가하고, 수집한 링크를 한 번에 복사할 수 있습니다."
+    "message": "Pixiv, Pawchive, Bepis, koikatsucards.com에 수집 버튼을 추가하고, 선택한 텍스트에서 Gofile/Mega/Drive/Catbox 링크를 추출해 한 번에 복사합니다."
   },
   "menuExtract": {
     "message": "KKAFIO Link Collector로 링크 추출"

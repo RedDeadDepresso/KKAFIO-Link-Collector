@@ -3,7 +3,7 @@
     "message": "KKAFIO Link Collector"
   },
   "extDescription": {
-    "message": "Добавляет кнопку сбора на публикации Pixiv, Pawchive и других сайтов и позволяет скопировать все собранные ссылки."
+    "message": "Кнопки сбора для Pixiv, Pawchive, Bepis и koikatsucards.com; ссылки Gofile/Mega/Drive/Catbox из выделения; копирование всех."
   },
   "menuExtract": {
     "message": "Извлечь ссылки с помощью KKAFIO Link Collector"

@@ -3,7 +3,7 @@
     "message": "KKAFIO Link Collector"
   },
   "extDescription": {
-    "message": "Pixiv や Pawchive などの投稿に収集ボタンを追加し、集めたリンクをまとめてコピーできます。"
+    "message": "Pixiv・Pawchive・Bepis・koikatsucards.com に収集ボタンを追加。選択テキストから Gofile/Mega/Drive/Catbox のリンクを抽出し、まとめてコピーできます。"
   },
   "menuExtract": {
     "message": "KKAFIO Link Collector でリンクを抽出"

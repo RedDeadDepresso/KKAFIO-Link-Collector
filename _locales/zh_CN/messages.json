@@ -3,7 +3,7 @@
     "message": "KKAFIO Link Collector"
   },
   "extDescription": {
-    "message": "在 Pixiv、Pawchive 等站点的作品上添加收集按钮，并可一键复制所有已收集的链接。"
+    "message": "为 Pixiv、Pawchive、Bepis 和 koikatsucards.com 添加收集按钮；可从选中文本提取 Gofile/Mega/Drive/Catbox 链接，并一键复制全部。"
   },
   "menuExtract": {
     "message": "使用 KKAFIO Link Collector 提取链接"
