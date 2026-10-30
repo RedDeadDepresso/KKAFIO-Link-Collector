@@ -2,10 +2,15 @@
 const SITES = [
   {
     host: /(^|\.)pixiv\.net$/,
-    // matches /artworks/123 and /en/artworks/123 -> canonical link
+    // thumbnails + post pages: /artworks/123 and /en/artworks/123 -> canonical link
     match: (u) => {
-      const m = u.pathname.match(/^\/(?:[a-z]{2}\/)?artworks\/(\d+)/);
+      const m = u.pathname.match(/^\/(?:[a-z]{2}(?:_[a-z]{2})?\/)?artworks\/(\d+)/);
       return m ? `https://www.pixiv.net/artworks/${m[1]}` : null;
+    },
+    // extra pages that get the floating "collect" button: /users/ID and /users/ID/illustrations
+    page: (u) => {
+      const m = u.pathname.match(/^\/(?:[a-z]{2}(?:_[a-z]{2})?\/)?users\/(\d+)(\/illustrations)?\/?$/);
+      return m ? `https://www.pixiv.net/users/${m[1]}${m[2] || ""}` : null;
     },
   },
   {
@@ -18,19 +23,29 @@ const SITES = [
   },
   {
     host: /^db\.bepis\.moe$/,
-    // /GAME/view/ID  (e.g. /koikatsu/view/1234)
+    // /GAME/view/ID  (e.g. /koikatsu/view/1234, /kkclothing/view/1234)
     match: (u) => {
       const m = u.pathname.match(/^\/[^/]+\/view\/[^/?#]+/);
       return m ? u.origin + m[0] : null;
     },
+    // listing pages also get the floating button (query string kept: filters/pages)
+    page: (u) =>
+      /^\/(koikatsu|kkscenes|kkclothing)\/?$/.test(u.pathname)
+        ? u.origin + u.pathname.replace(/\/$/, "") + u.search
+        : null,
   },
   {
     host: /(^|\.)koikatsucards\.com$/,
-    // GUESS for the page-level button; adjust if needed
+    // card pages: /contents/ID (plus a few guesses)
     match: (u) => {
-      const m = u.pathname.match(/^\/(?:card|cards|post|posts|view|c)\/[^/?#]+/);
+      const m = u.pathname.match(/^\/(?:contents|card|cards|post|posts|view|c)\/[^/?#]+/);
       return m ? u.origin + m[0] : null;
     },
+    // listing/search pages also get the floating button (query string kept)
+    page: (u) =>
+      /^\/(contents|search)\/?$/.test(u.pathname)
+        ? u.origin + u.pathname.replace(/\/$/, "") + u.search
+        : null,
     // also put a button on ANY image-link to a same-site page (thumbnails)
     anyThumb: true,
   },
@@ -43,6 +58,14 @@ let collected = new Set();
 const getLinks = () =>
   new Promise((r) => chrome.storage.local.get({ links: [] }, (d) => r(d.links)));
 const setLinks = (links) => chrome.storage.local.set({ links });
+
+// URL to collect for the current page (floating button)
+function canonicalPage(href) {
+  try {
+    const u = new URL(href, location.href);
+    return (site.page && site.page(u)) || site.match(u);
+  } catch { return null; }
+}
 
 function canonical(href, thumb) {
   try {
@@ -177,7 +200,7 @@ function update() {
   }
 
   // floating button on the post page itself
-  const cur = canonical(location.href);
+  const cur = canonicalPage(location.href);
   const f = document.querySelector(".lc-float");
   if (cur && !f) document.body.appendChild(makeBtn(cur, true));
   else if (cur && f && f.dataset.url !== cur) { f.dataset.url = cur; paint(f); }
