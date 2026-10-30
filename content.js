@@ -106,7 +106,7 @@ function makeBtn(url, floating) {
   b.title = t("collectBtnTitle");
   b.addEventListener("click", (e) => {
     e.preventDefault(); e.stopPropagation();
-    toggle(url, b);
+    toggle(b.dataset.url, b); // read live: the floating button's URL changes on in-page navigation
   }, true);
   paint(b);
   return b;
