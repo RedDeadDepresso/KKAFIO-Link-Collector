@@ -7,10 +7,17 @@ const SITES = [
       const m = u.pathname.match(/^\/(?:[a-z]{2}(?:_[a-z]{2})?\/)?artworks\/(\d+)/);
       return m ? `https://www.pixiv.net/artworks/${m[1]}` : null;
     },
-    // extra pages that get the floating "collect" button: /users/ID and /users/ID/illustrations
+    // extra pages that get the floating "collect" button:
+    // /users/ID, /users/ID/illustrations, /users/ID/illustrations/<anything> and /search
+    // (the query string is appended automatically by canonicalPage)
     page: (u) => {
-      const m = u.pathname.match(/^\/(?:[a-z]{2}(?:_[a-z]{2})?\/)?users\/(\d+)(\/illustrations)?\/?$/);
-      return m ? `https://www.pixiv.net/users/${m[1]}${m[2] || ""}` : null;
+      const m = u.pathname.match(/^\/(?:[a-z]{2}(?:_[a-z]{2})?\/)?users\/(\d+)(\/illustrations(?:\/[^/?#]+)*)?\/?$/);
+      if (m) return `https://www.pixiv.net/users/${m[1]}${m[2] || ""}`;
+      if (/^\/(?:[a-z]{2}(?:_[a-z]{2})?\/)?search\/?$/.test(u.pathname)) return "https://www.pixiv.net/search";
+      // keyword search results: /tags/<keyword>/artworks (also /illustrations, /top, etc.)
+      const t = u.pathname.match(/^\/(?:[a-z]{2}(?:_[a-z]{2})?\/)?(tags\/[^/?#]+(?:\/[^/?#]+)?)\/?$/);
+      if (t) return `https://www.pixiv.net/${t[1]}`;
+      return null;
     },
   },
   {
