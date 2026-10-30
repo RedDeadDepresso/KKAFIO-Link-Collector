@@ -12,3 +12,21 @@
   width: auto; height: auto; border-radius: 20px; padding: 8px 14px;
   font: 600 14px/1 sans-serif; z-index: 2147483647;
 }
+
+/* pawchive: cancel the hover/focus "lift" on post cards so the + button stays put */
+.post-card:hover > a,
+.post-card > a:active,
+.post-card > a:focus {
+  top: 0 !important;
+}
+
+/* pawchive creators page: cancel the 3px lift on creator cards */
+.user-card:hover,
+.user-card:focus-within {
+  top: 0 !important;
+}
+
+/* koikatsucards: cancel the 6px lift on content cards */
+.content-grid .card:hover {
+  transform: none !important;
+}
