@@ -205,6 +205,23 @@ function isCovered(a, r) {
   return !(box.contains(el) || el.contains(box));
 }
 
+// true if the spot where the button would sit is scrolled/clipped out of view
+// inside a scrollable or overflow:hidden ancestor (e.g. horizontal carousels)
+function isClipped(img, r, cache) {
+  const bx1 = r.left + 6, by1 = r.top + 6, bx2 = bx1 + 32, by2 = by1 + 32;
+  for (let p = img.parentElement; p && p !== document.body && p !== document.documentElement; p = p.parentElement) {
+    let c = cache.get(p);
+    if (c === undefined) {
+      const cs = getComputedStyle(p);
+      const clips = (v) => v !== "visible";
+      c = clips(cs.overflowX) || clips(cs.overflowY) ? p.getBoundingClientRect() : null;
+      cache.set(p, c);
+    }
+    if (c && (bx1 < c.left || bx2 > c.right || by1 < c.top || by2 > c.bottom)) return true;
+  }
+  return false;
+}
+
 // Remove anything that looks like ours but isn't live (e.g. restored from a
 // site's history snapshot, such as htmx's body cache).
 function purgeStale() {
@@ -227,6 +244,7 @@ function update() {
   purgeStale();
   const vw = innerWidth, vh = innerHeight, M = 400; // render a bit beyond the viewport
   const seen = new Set();
+  const clipCache = new Map(); // ancestor -> clip rect (or null), per pass
   // The overlay scrolls with the page, so buttons are placed relative to it
   // (page coordinates) and the browser moves them natively while scrolling.
   const ov = getOverlay();
@@ -237,6 +255,7 @@ function update() {
     const r = img.getBoundingClientRect();
     if (r.width < 50 || r.height < 50 || r.bottom < -M || r.top > vh + M || r.right < -M || r.left > vw + M) return;
     if (!isShown(img) || isCovered(a, r)) return; // hidden posts get no button
+    if (isClipped(img, r, clipCache)) return; // scrolled out of a carousel / clipped container
     const url = urlFor(a);
     if (!url) return;
     let b = tracked.get(a);
