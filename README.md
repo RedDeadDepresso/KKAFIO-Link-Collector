@@ -1,6 +1,6 @@
 # KKAFIO Link Collector
 
-A browser extension that adds a **collect** button to posts on several art and card sites. Click it to store the post's link, then copy everything at once and paste it into an external app to download.
+A browser extension that adds a **collect** button to posts on several art and card sites. Click it to store the post's link, then copy everything at once and paste them into the "Download Contents Links" text box in KKAFIO.
 
 Everything is stored locally in your browser. The extension makes no network requests and sends nothing anywhere.
 
@@ -84,5 +84,4 @@ _locales/            Translations
 ## Notes and limitations
 
 - Buttons are drawn in a separate overlay on top of the page, rather than inside the site's own elements. This avoids breaking sites built with frameworks like React (such as Pixiv).
-- The URL patterns for Pawchive, db.bepis.moe and koikatsucards.com are based on known or guessed structures. On koikatsucards.com, every thumbnail that links to another page gets a button, so you may occasionally see one on a non-post image. Adjust the `match` function in `content.js` if a site's structure differs.
 - Translations were written without a native-speaker review; corrections are welcome.
