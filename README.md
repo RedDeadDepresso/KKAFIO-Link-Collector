@@ -67,6 +67,7 @@ background.js        Right-click menu and link extraction
 content.js           Collect buttons injected into supported sites
 content.css          Button styles
 popup.html/js/css    Toolbar popup with the link list
+i18n.js              Translation helper with built-in English fallback
 icons/               Extension icons (16, 32, 48, 128 px)
 _locales/            Translations
 ```
@@ -83,4 +84,5 @@ _locales/            Translations
 ## Notes and limitations
 
 - Buttons are drawn in a separate overlay on top of the page, rather than inside the site's own elements. This avoids breaking sites built with frameworks like React (such as Pixiv).
+- The URL patterns for Pawchive, db.bepis.moe and koikatsucards.com are based on known or guessed structures. On koikatsucards.com, every thumbnail that links to another page gets a button, so you may occasionally see one on a non-post image. Adjust the `match` function in `content.js` if a site's structure differs.
 - Translations were written without a native-speaker review; corrections are welcome.

@@ -30,6 +30,7 @@
         "*://db.bepis.moe/*"
       ],
       "js": [
+        "i18n.js",
         "content.js"
       ],
       "css": [

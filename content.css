@@ -1,4 +1,4 @@
-#lc-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 2147483646; }
+#lc-overlay { position: absolute; top: 0; left: 0; width: 0; height: 0; overflow: visible; pointer-events: none; z-index: 2147483646; }
 .lc-btn {
   position: absolute; top: 6px; left: 6px; z-index: 9999; pointer-events: auto;
   width: 28px; height: 28px; border-radius: 50%; border: none; cursor: pointer;

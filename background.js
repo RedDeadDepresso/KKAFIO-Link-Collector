@@ -29,7 +29,7 @@ function createMenu() {
   api.contextMenus.removeAll(() => {
     api.contextMenus.create({
       id: MENU_ID,
-      title: api.i18n.getMessage("menuExtract"),
+      title: api.i18n.getMessage("menuExtract") || "Extract links with KKAFIO Link Collector",
       contexts: ["selection", "link"],
     });
   });
@@ -117,5 +117,5 @@ api.contextMenus.onClicked.addListener(async (info, tab) => {
   await api.storage.local.set({ links });
 
   if (added) flashBadge("+" + added, "#22c55e");
-  else flashBadge(found.length ? api.i18n.getMessage("badgeDup") : "0", "#888888"); // "0" = no links from allowed sites
+  else flashBadge(found.length ? (api.i18n.getMessage("badgeDup") || "dup") : "0", "#888888"); // "0" = no links from allowed sites
 });

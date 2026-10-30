@@ -37,7 +37,6 @@ const SITES = [
 ];
 // ========================================================================
 
-const t = (k) => chrome.i18n.getMessage(k);
 const site = SITES.find((s) => s.host.test(location.hostname));
 let collected = new Set();
 
@@ -74,6 +73,7 @@ function paint(btn) {
 
 function makeBtn(url, floating) {
   const b = document.createElement("button");
+  b._lc = true; // expando: marks buttons we own; lost when a page snapshot is cloned
   b.className = "lc-btn" + (floating ? " lc-float" : "");
   b.dataset.url = url;
   b.title = t("collectBtnTitle");
@@ -86,7 +86,7 @@ function makeBtn(url, floating) {
 }
 
 // Thumbnail buttons live in their own overlay on <body>, positioned over the
-// images. We never modify the site's own elements (that breaks React pages).
+// images (in page coordinates, so they scroll smoothly with the page). We never modify the site's own elements (that breaks React pages).
 const tracked = new Map(); // anchor -> button
 const urlCache = new Map();
 let overlay;
@@ -94,6 +94,7 @@ let overlay;
 function getOverlay() {
   if (!overlay || !overlay.isConnected) {
     overlay = document.createElement("div");
+    overlay._lc = true;
     overlay.id = "lc-overlay";
     document.body.appendChild(overlay);
   }
@@ -106,25 +107,69 @@ function urlFor(a) {
   return urlCache.get(href);
 }
 
+function isShown(el) {
+  if (el.checkVisibility) {
+    return el.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true });
+  }
+  const cs = getComputedStyle(el);
+  return cs.display !== "none" && cs.visibility !== "hidden" && cs.opacity !== "0";
+}
+
+// true if something unrelated (another page layer, modal...) is drawn over the thumbnail
+function isCovered(a, r) {
+  const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  if (cx < 0 || cy < 0 || cx > innerWidth || cy > innerHeight) return false; // can't tell off-screen
+  const el = document.elementFromPoint(cx, cy);
+  if (!el) return false;
+  const box = (a.parentElement && a.parentElement.parentElement) || a;
+  return !(box.contains(el) || el.contains(box));
+}
+
+// Remove anything that looks like ours but isn't live (e.g. restored from a
+// site's history snapshot, such as htmx's body cache).
+function purgeStale() {
+  document.querySelectorAll("#lc-overlay").forEach((o) => { if (!o._lc) o.remove(); });
+  document.querySelectorAll(".lc-btn").forEach((b) => { if (!b._lc) b.remove(); });
+  const floats = [...document.querySelectorAll(".lc-float")];
+  floats.slice(1).forEach((b) => b.remove());
+}
+
+// Take our UI out of the DOM (used before the site snapshots the page).
+function removeUI() {
+  tracked.forEach((b) => b.remove());
+  tracked.clear();
+  document.querySelectorAll(".lc-float").forEach((b) => b.remove());
+  if (overlay) overlay.remove();
+  overlay = null;
+}
+
 function update() {
-  const vw = innerWidth, vh = innerHeight;
+  purgeStale();
+  const vw = innerWidth, vh = innerHeight, M = 400; // render a bit beyond the viewport
   const seen = new Set();
+  // The overlay scrolls with the page, so buttons are placed relative to it
+  // (page coordinates) and the browser moves them natively while scrolling.
+  const ov = getOverlay();
+  const o = ov.getBoundingClientRect();
   document.querySelectorAll("a[href]").forEach((a) => {
     const img = a.querySelector("img");
     if (!img) return;
     const r = img.getBoundingClientRect();
-    if (r.width < 50 || r.height < 50 || r.bottom < 0 || r.top > vh || r.right < 0 || r.left > vw) return;
+    if (r.width < 50 || r.height < 50 || r.bottom < -M || r.top > vh + M || r.right < -M || r.left > vw + M) return;
+    if (!isShown(img) || isCovered(a, r)) return; // hidden posts get no button
     const url = urlFor(a);
     if (!url) return;
     let b = tracked.get(a);
-    if (!b || b.dataset.url !== url) {
+    if (!b || !b.isConnected || b.dataset.url !== url) {
       if (b) b.remove();
       b = makeBtn(url, false);
-      getOverlay().appendChild(b);
+      ov.appendChild(b);
       tracked.set(a, b);
     }
-    b.style.left = r.left + 6 + "px";
-    b.style.top = r.top + 6 + "px";
+    const x = Math.round(r.left - o.left + 6);
+    const y = Math.round(r.top - o.top + 6);
+    if (b._x !== x) { b.style.left = x + "px"; b._x = x; }
+    if (b._y !== y) { b.style.top = y + "px"; b._y = y; }
     seen.add(a);
   });
   for (const [a, b] of tracked) {
@@ -154,10 +199,23 @@ async function init() {
   if (!site) return;
   collected = new Set((await getLinks()).map((l) => l.url));
   update();
-  new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true });
+  new MutationObserver((records) => {
+    // ignore changes made by our own overlay
+    if (records.some((r) => !(overlay && overlay.contains(r.target)))) schedule();
+  }).observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ["class", "style", "hidden", "aria-hidden"],
+  });
+  // htmx (Pawchive) snapshots <body> into its history cache: keep our UI out of it
+  document.addEventListener("htmx:beforeHistorySave", () => { removeUI(); setTimeout(schedule, 0); });
+  document.addEventListener("htmx:historyRestore", schedule);
+  document.addEventListener("htmx:afterSettle", schedule);
+  addEventListener("popstate", schedule);
   addEventListener("scroll", schedule, true);
   addEventListener("resize", schedule);
-  setInterval(schedule, 1000); // catches lazy-loaded images / layout shifts
+  setInterval(schedule, 500); // catches lazy-loaded images / layout shifts
   chrome.storage.onChanged.addListener((c) => {
     if (c.links) { collected = new Set(c.links.newValue.map((l) => l.url)); refresh(); }
   });

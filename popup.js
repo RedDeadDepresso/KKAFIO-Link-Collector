@@ -1,5 +1,4 @@
 const $ = (id) => document.getElementById(id);
-const t = (k, ...subs) => chrome.i18n.getMessage(k, subs);
 document.querySelectorAll("[data-i18n]").forEach((el) => (el.textContent = t(el.dataset.i18n)));
 document.title = t("extName");
 const get = () => new Promise((r) => chrome.storage.local.get({ links: [] }, (d) => r(d.links)));
