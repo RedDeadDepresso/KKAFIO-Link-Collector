@@ -70,11 +70,36 @@ function extractFromSelection() {
   return [...out].filter((u) => /^https?:\/\//i.test(u));
 }
 
-function flashBadge(text, color) {
-  api.action.setBadgeBackgroundColor({ color });
-  api.action.setBadgeText({ text });
-  setTimeout(() => api.action.setBadgeText({ text: "" }), 2500);
+// ---- badge: permanent total of collected links, briefly replaced by a flash ----
+let flashing = false;
+
+// Chrome picks black or white text automatically; force white
+const setWhiteText = () => api.action.setBadgeTextColor && api.action.setBadgeTextColor({ color: "#ffffff" });
+
+async function updateBadge() {
+  if (flashing) return;
+  const { links = [] } = await api.storage.local.get({ links: [] });
+  const n = links.length;
+  api.action.setBadgeBackgroundColor({ color: "#3b82f6" });
+  setWhiteText();
+  api.action.setBadgeText({ text: n ? (n > 999 ? "999+" : String(n)) : "" });
 }
+
+function flashBadge(text, color) {
+  flashing = true;
+  api.action.setBadgeBackgroundColor({ color });
+  setWhiteText();
+  api.action.setBadgeText({ text });
+  setTimeout(() => { flashing = false; updateBadge(); }, 2500);
+}
+
+// keep the total in sync with every change (buttons, popup, extraction, clearing)
+api.storage.onChanged.addListener((changes, area) => {
+  if (area === "local" && changes.links) updateBadge();
+});
+api.runtime.onInstalled.addListener(updateBadge);
+api.runtime.onStartup.addListener(updateBadge);
+updateBadge(); // also when the service worker wakes up
 
 api.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId !== MENU_ID || !tab) return;
