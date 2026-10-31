@@ -45,12 +45,13 @@ const SITES = [
     host: /(^|\.)koikatsucards\.com$/,
     // card pages: /contents/ID (plus a few guesses)
     match: (u) => {
-      const m = u.pathname.match(/^\/(?:contents|card|cards|post|posts|view|c)\/[^/?#]+/);
+      // optional language prefix, e.g. /en/contents/ID
+      const m = u.pathname.match(/^\/(?:[a-z]{2}(?:[-_][A-Za-z]{2,4})?\/)?(?:contents|card|cards|post|posts|view|c)\/[^/?#]+/);
       return m ? u.origin + m[0] : null;
     },
     // listing/search pages also get the floating button (query string kept)
     page: (u) =>
-      /^\/(contents|search)\/?$/.test(u.pathname)
+      /^\/(?:[a-z]{2}(?:[-_][A-Za-z]{2,4})?\/)?(contents|search)\/?$/.test(u.pathname)
         ? u.origin + u.pathname.replace(/\/$/, "") + u.search
         : null,
     // also put a button on ANY image-link to a same-site page (thumbnails)
