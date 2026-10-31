@@ -42,13 +42,15 @@ Right-click extraction keeps only links on these domains (and their subdomains):
 
 After updating the files, reload the extension from the same page.
 
+> **Tip:** pin the extension to the toolbar (puzzle-piece icon → pin) so the icon, and the badge with your total number of collected links, is always visible.
+
 ## Usage
 
 1. Browse a supported site and click **+** on a post thumbnail, or use the floating **Collect link** button on a post page.
 2. Click the extension icon to see the collected links.
 3. Press **Copy all** (one link per line) and paste into your downloader. **Copy & clear** also empties the list.
 
-For other pages: highlight text containing links (or right-click a hyperlink) → **Extract links with KKAFIO Link Collector**. The toolbar badge shows `+N` for links added, `dup` if all were already collected, or `0` if none matched the allowed domains.
+For other pages: highlight text containing links (or right-click a hyperlink) → **Extract links with KKAFIO Link Collector**. The toolbar badge normally shows the total number of collected links; after an extraction it briefly shows `+N` for links added, `dup` if all were already collected, or `0` if none matched the allowed domains.
 
 ## Configuration
 
