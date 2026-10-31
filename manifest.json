@@ -3,6 +3,7 @@
   "name": "__MSG_extName__",
   "version": "1.0",
   "description": "__MSG_extDescription__",
+  "homepage_url": "https://github.com/RedDeadDepresso/KKAFIO-Link-Collector",
   "permissions": [
     "storage",
     "contextMenus",
