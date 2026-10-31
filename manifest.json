@@ -47,7 +47,10 @@
   ],
   "browser_specific_settings": {
     "gecko": {
-      "id": "kkafio-link-collector@RedDeadDepresso"
+      "id": "kkafio-link-collector@RedDeadDepresso",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
     }
   },
   "icons": {
