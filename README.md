@@ -42,7 +42,7 @@ Right-click extraction keeps only links on these domains (and their subdomains):
 
 After updating the files, reload the extension from the same page.
 
-> **Tip:** pin the extension to the toolbar (puzzle-piece icon → pin) so the icon, and the badge with your total number of collected links, is always visible.
+> **Tip:** pin the extension to the toolbar (puzzle-piece icon → pin). The popup is then one click away, and the icon, with the badge showing your total number of collected links, is always visible.
 
 ## Usage
 
