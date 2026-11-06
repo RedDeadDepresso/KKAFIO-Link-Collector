@@ -1,0 +1,106 @@
+name: Release
+
+# Runs when a version tag such as v1.1.0 is pushed.
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: ver
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Check manifest.json version matches the tag
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          MANIFEST_VERSION=$(python3 -c "import json; print(json.load(open('manifest.json'))['version'])")
+          if [ "$MANIFEST_VERSION" != "$VERSION" ]; then
+            echo "::error::Tag version ($VERSION) does not match manifest.json version ($MANIFEST_VERSION). Update manifest.json, then re-create the tag."
+            exit 1
+          fi
+
+      - name: Extract changelog for this version
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          # everything between "## [VERSION]" and the next "## [" heading
+          awk -v v="$VERSION" '
+            index($0, "## [" v "]") == 1 { found = 1; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' CHANGELOG.md | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}' | sed '/./,$!d' > changelog_section.md
+          if [ ! -s changelog_section.md ]; then
+            echo "::error::No entry for version $VERSION found in CHANGELOG.md (expected a heading like '## [$VERSION]')."
+            exit 1
+          fi
+          echo "---- changelog ----"
+          cat changelog_section.md
+
+      - name: Build extension zip
+        id: zip
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          ZIP="KKAFIO-Link-Collector-v${VERSION}.zip"
+          # manifest.json ends up at the root of the zip
+          zip -r "$ZIP" . \
+            -x ".git/*" ".github/*" ".gitignore" ".gitattributes" \
+               "changelog_section.md" "release_notes.md" "*.zip"
+          echo "name=${ZIP}" >> "$GITHUB_OUTPUT"
+          unzip -l "$ZIP"
+
+      - name: Write release notes
+        env:
+          ZIP: ${{ steps.zip.outputs.name }}
+        run: |
+          {
+            echo "## What's changed"
+            echo
+            cat changelog_section.md
+            echo
+            cat <<'EOF_NOTES'
+          ## Installation
+
+          ### Chrome / Edge / Brave / other Chromium browsers (install from zip)
+
+          This extension was rejected from the Chrome Web Store, so it has to be installed manually:
+
+          1. Download **@ZIP@** from the assets below and unzip it into a folder you will keep (the browser loads the extension from this folder, so don't delete it).
+          2. Open `chrome://extensions` (Edge: `edge://extensions`, Brave: `brave://extensions`) and turn on **Developer mode**.
+          3. Click **Load unpacked** and select the unzipped folder (the one containing `manifest.json`).
+          4. Optional: pin the extension to the toolbar (puzzle-piece icon).
+
+          **Updating:** download the new zip, replace the files in the same folder, then click the reload icon on the extension's card in `chrome://extensions`.
+
+          ### Firefox
+
+          Install from Mozilla Add-ons: https://addons.mozilla.org/en-GB/firefox/addon/kkafio-link-collector/
+          EOF_NOTES
+          } > release_notes.md
+          sed -i "s/@ZIP@/${ZIP}/g" release_notes.md
+          cat release_notes.md
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ steps.ver.outputs.tag }}
+          ZIP: ${{ steps.zip.outputs.name }}
+        run: |
+          gh release create "$TAG" "$ZIP" \
+            --title "KKAFIO Link Collector $TAG" \
+            --notes-file release_notes.md \
+            --verify-tag
