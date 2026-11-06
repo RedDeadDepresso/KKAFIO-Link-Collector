@@ -42,6 +42,30 @@ function unwrapJump(url) {
   }
 }
 
+// Finds Base64-encoded URLs in plain text (also nested, e.g. base64 of base64)
+// and returns the decoded http(s) links. Tokens that don't decode to a URL are ignored.
+function decodeBase64Urls(text) {
+  const out = [];
+  const tokens = String(text || "").match(/[A-Za-z0-9+/_-]{16,}={0,2}/g) || [];
+  for (const tok of tokens) {
+    let cur = tok;
+    for (let layer = 0; layer < 5; layer++) {
+      let dec;
+      try {
+        let b = cur.replace(/-/g, "+").replace(/_/g, "/").replace(/=+$/, "");
+        b += "=".repeat((4 - (b.length % 4)) % 4);
+        dec = atob(b);
+        // reject anything that isn't printable text
+        if (/[^\x20-\x7e\r\n\t]/.test(dec)) break;
+      } catch { break; }
+      const hit = dec.match(/https?:\/\/[^\s<>"'`]+/i);
+      if (hit) { out.push(hit[0].replace(/[.,;:!?)\]}>]+$/, "")); break; }
+      cur = dec.trim();
+    }
+  }
+  return out;
+}
+
 function createMenu() {
   api.contextMenus.removeAll(() => {
     api.contextMenus.create({
@@ -138,6 +162,9 @@ api.contextMenus.onClicked.addListener(async (info, tab) => {
       console.error("KKAFIO: could not read selection", e);
     }
   }
+
+  // Base64-encoded links in the highlighted text (single or nested encoding)
+  if (info.selectionText) found.push(...decodeBase64Urls(info.selectionText));
 
   // fall back to plain text of the selection if scripting failed
   if (!found.length && info.selectionText) {
