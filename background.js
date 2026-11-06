@@ -25,6 +25,23 @@ function isAllowed(url) {
   }
 }
 
+// Pixiv wraps external links as https://www.pixiv.net/jump.php?<encoded target>
+// (or jump.php?url=<encoded target>). Return the real target instead.
+function unwrapJump(url) {
+  try {
+    const u = new URL(url);
+    if (!/(^|\.)pixiv\.net$/i.test(u.hostname) || !/^\/jump\.php$/i.test(u.pathname)) return url;
+    let target = u.searchParams.get("url");
+    if (!target) {
+      const raw = u.search.slice(1);
+      try { target = decodeURIComponent(raw); } catch { target = raw; }
+    }
+    return /^https?:\/\//i.test(target) ? target : url;
+  } catch {
+    return url;
+  }
+}
+
 function createMenu() {
   api.contextMenus.removeAll(() => {
     api.contextMenus.create({
@@ -128,7 +145,7 @@ api.contextMenus.onClicked.addListener(async (info, tab) => {
       .map((u) => u.replace(/[.,;:!?)\]}>]+$/, ""));
   }
 
-  found = [...new Set(found)].filter(isAllowed);
+  found = [...new Set(found.map(unwrapJump))].filter(isAllowed);
 
   const { links = [] } = await api.storage.local.get({ links: [] });
   const have = new Set(links.map((l) => l.url));
