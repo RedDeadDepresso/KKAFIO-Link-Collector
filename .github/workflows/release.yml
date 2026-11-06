@@ -1,10 +1,11 @@
 name: Release
 
-# Runs when a version tag such as v1.1.0 is pushed.
+# Runs when you publish a release on GitHub (tag it like v1.1.0).
+# It attaches the extension zip and replaces the release description
+# with the changelog entry + install instructions.
 on:
-  push:
-    tags:
-      - "v[0-9]+.[0-9]+.[0-9]+"
+  release:
+    types: [published]
 
 permissions:
   contents: write
@@ -18,8 +19,13 @@ jobs:
 
       - name: Get version from tag
         id: ver
+        env:
+          TAG: ${{ github.event.release.tag_name }}
         run: |
-          TAG="${GITHUB_REF_NAME}"
+          if ! echo "$TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Release tag '$TAG' must look like v1.2.3."
+            exit 1
+          fi
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
           echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
 
@@ -94,13 +100,11 @@ jobs:
           sed -i "s/@ZIP@/${ZIP}/g" release_notes.md
           cat release_notes.md
 
-      - name: Create GitHub release
+      - name: Update the release (attach zip, replace description)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ steps.ver.outputs.tag }}
           ZIP: ${{ steps.zip.outputs.name }}
         run: |
-          gh release create "$TAG" "$ZIP" \
-            --title "KKAFIO Link Collector $TAG" \
-            --notes-file release_notes.md \
-            --verify-tag
+          gh release upload "$TAG" "$ZIP" --clobber
+          gh release edit "$TAG" --notes-file release_notes.md
