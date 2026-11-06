@@ -66,12 +66,18 @@ function decodeBase64Urls(text) {
   return out;
 }
 
+const MENU_ID_ANY = "kkafio-extract-links-any";
 function createMenu() {
   api.contextMenus.removeAll(() => {
+    const title = api.i18n.getMessage("menuExtract") || "Extract links with KKAFIO Link Collector";
+    // highlighted text / links: every website
+    api.contextMenus.create({ id: MENU_ID, title, contexts: ["selection", "link"] });
+    // right-click anywhere (buttons etc.): only where target.js runs
     api.contextMenus.create({
-      id: MENU_ID,
-      title: api.i18n.getMessage("menuExtract") || "Extract links with KKAFIO Link Collector",
-      contexts: ["selection", "link"],
+      id: MENU_ID_ANY,
+      title,
+      contexts: ["page", "frame", "image", "video", "audio", "editable"],
+      documentUrlPatterns: ["*://kknow.cc/*", "*://*.kknow.cc/*"],
     });
   });
 }
@@ -100,6 +106,28 @@ function extractFromSelection() {
         if (sel.containsNode(a, true)) out.add(a.href);
       });
     }
+  }
+
+  // URLs hidden in element attributes: onclick="window.open('https://...')",
+  // data-href / data-url, formaction, etc. (buttons, spans, divs...)
+  const scanAttrs = (el) => {
+    for (const attr of el.attributes) {
+      if (/^(style|class|src|srcset|d|viewbox|points|transform)$/i.test(attr.name)) continue;
+      const v = attr.value.replace(/\\\//g, "/"); // JS-escaped slashes: https:\/\/
+      for (const m of v.matchAll(/https?:\/\/[^\s<>"'`\\]+/gi)) {
+        out.add(m[0].replace(/[.,;:!?)\]}>]+$/, ""));
+      }
+    }
+  };
+  for (let i = 0; i < sel.rangeCount; i++) {
+    const node = sel.getRangeAt(i).commonAncestorContainer;
+    const el = node.nodeType === 1 ? node : node.parentElement;
+    if (!el) continue;
+    // the element the selection sits inside (e.g. text inside a <button>) and its parents
+    for (let p = el, n = 0; p && p !== document.body && n < 4; p = p.parentElement, n++) scanAttrs(p);
+    // every element touched by the selection
+    scanAttrs(el);
+    el.querySelectorAll("*").forEach((c) => { if (sel.containsNode(c, true)) scanAttrs(c); });
   }
 
   // plain-text URLs
@@ -143,7 +171,7 @@ api.runtime.onStartup.addListener(updateBadge);
 updateBadge(); // also when the service worker wakes up
 
 api.contextMenus.onClicked.addListener(async (info, tab) => {
-  if (info.menuItemId !== MENU_ID || !tab) return;
+  if ((info.menuItemId !== MENU_ID && info.menuItemId !== MENU_ID_ANY) || !tab) return;
 
   let found = [];
 
@@ -165,6 +193,16 @@ api.contextMenus.onClicked.addListener(async (info, tab) => {
 
   // Base64-encoded links in the highlighted text (single or nested encoding)
   if (info.selectionText) found.push(...decodeBase64Urls(info.selectionText));
+
+  // right-clicked element (button, div with onclick/data-href, ...) when nothing is highlighted
+  if (!info.selectionText) {
+    try {
+      const urls = await api.tabs.sendMessage(tab.id, { type: "kkafio-get-target-urls" }, { frameId: info.frameId || 0 });
+      if (Array.isArray(urls)) found.push(...urls);
+    } catch (e) {
+      console.error("KKAFIO: could not read clicked element", e);
+    }
+  }
 
   // fall back to plain text of the selection if scripting failed
   if (!found.length && info.selectionText) {

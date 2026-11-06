@@ -44,13 +44,27 @@
         "content.css"
       ],
       "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "*://kknow.cc/*",
+        "*://*.kknow.cc/*"
+      ],
+      "js": [
+        "target.js"
+      ],
+      "all_frames": true,
+      "match_about_blank": true,
+      "run_at": "document_start"
     }
   ],
   "browser_specific_settings": {
     "gecko": {
       "id": "kkafio-link-collector@RedDeadDepresso.com",
       "data_collection_permissions": {
-        "required": ["none"]
+        "required": [
+          "none"
+        ]
       }
     }
   },
