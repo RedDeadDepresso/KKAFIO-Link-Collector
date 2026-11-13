@@ -14,6 +14,21 @@ const ALLOWED_DOMAINS = [
   "drive.google.com",
   "drive.usercontent.google.com",
   "catbox.moe",
+  // TeraBox and its mirrors
+  "terabox.com",
+  "terabox.app",
+  "1024tera.com",
+  "1024terabox.com",
+  "teraboxapp.com",
+  "teraboxshare.com",
+  "terasharelink.com",
+  "terafileshare.com",
+  "nephobox.com",
+  "4funbox.com",
+  "mirrobox.com",
+  "freeterabox.com",
+  "momerybox.com",
+  "tibibox.com",
 ];
 
 function isAllowed(url) {
@@ -139,6 +154,92 @@ function extractFromSelection() {
   return [...out].filter((u) => /^https?:\/\//i.test(u));
 }
 
+// Runs inside the page. TeraBox gives a file no link of its own, so on a TeraBox share page the
+// highlighted file / folder rows become one link each: the share plus the item's path
+//   https://www.1024tera.com/sharing/link?surl=<id>&path=%2FCards%2FAlucid%2Fcard.png
+// KKAFIO's Download Contents downloads just that file (or that folder, recursively).
+// The page's address bar does not change while browsing folders, so the path comes from the page:
+//   - rows of the folder tree (left): the names of the folders around the row, no language involved;
+//   - rows of the file list: the breadcrumbs (the root item, whatever its label, is skipped), or,
+//     when the breadcrumbs are collapsed ("..."), the folder selected in the tree.
+// Must stay self-contained: it is serialized into the page by scripting.executeScript.
+function extractTeraboxItems() {
+  const sel = getSelection();
+  if (!sel || !sel.rangeCount || sel.isCollapsed) return [];
+
+  // the share id: /s/1<id>, or ?surl=<id> (an id is 22 characters; a 23-character one has the "1" prefix)
+  const q = new URLSearchParams(location.search);
+  let surl = "";
+  const pm = location.pathname.match(/^\/s\/1([A-Za-z0-9_-]+)/);
+  if (pm) surl = pm[1];
+  else {
+    surl = q.get("surl") || "";
+    if (surl.length === 23 && surl[0] === "1") surl = surl.slice(1);
+  }
+  if (!surl) return [];
+
+  const text = (el) => (el.textContent || "").trim();
+  // true if the selection covers some of the element's text (merely touching its edge does not count)
+  const covers = (el) => {
+    // the span of the element's text (not of the element: a selection that stops at the start of the
+    // next row's text must not count as covering that row)
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    const first = walker.nextNode();
+    if (!first) return false;
+    let last = first;
+    for (let n; (n = walker.nextNode()); ) last = n;
+    const er = document.createRange();
+    er.setStart(first, 0);
+    er.setEnd(last, last.length);
+    for (let i = 0; i < sel.rangeCount; i++) {
+      const r = sel.getRangeAt(i);
+      if (r.compareBoundaryPoints(Range.START_TO_END, er) > 0 && r.compareBoundaryPoints(Range.END_TO_START, er) < 0) return true;
+    }
+    return false;
+  };
+
+  // tree rows: folder names from the outermost folder down to the row
+  const WRAP = ".webmaster-file-item-wrapper";
+  const treePath = (wrap) => {
+    const parts = [];
+    for (let w = wrap; w; w = w.parentElement && w.parentElement.closest(WRAP)) {
+      const n = w.querySelector(":scope > .webmaster-file-item .file-item-name");
+      parts.unshift(n ? text(n) : "");
+    }
+    return parts;
+  };
+
+  // the folder the file list is showing (null if it cannot be told)
+  let folder;
+  const currentFolder = () => {
+    if (folder !== undefined) return folder;
+    const crumbs = [...document.querySelectorAll(".breadcrumb-nav .breadcrumb-item")];
+    const root = crumbs.findIndex((c) => c.classList.contains("root-name"));
+    const parts = crumbs.slice(root >= 0 ? root + 1 : 1).map(text);
+    if (crumbs.length && !parts.some((p) => !p || /^(\.{2,}|\u2026)$/.test(p))) return (folder = parts);
+    const open = [...document.querySelectorAll(".webmaster-file-item.is-selected.is-folder")].pop();
+    const wrap = open && open.closest(WRAP);
+    return (folder = wrap ? treePath(wrap) : null);
+  };
+
+  const out = new Set();
+  for (const el of document.querySelectorAll(".file-item-name")) {
+    const name = text(el);
+    if (!name || !covers(el)) continue;
+    let parts;
+    const wrap = el.closest(WRAP);
+    if (wrap) parts = treePath(wrap);
+    else {
+      const dir = currentFolder();
+      if (!dir) continue;
+      parts = [...dir, name];
+    }
+    if (parts.some((p) => !p)) continue;
+    out.add(`${location.origin}/sharing/link?surl=${surl}&path=${encodeURIComponent("/" + parts.join("/"))}`);
+  }
+  return [...out];
+}
+
 // ---- badge: permanent total of collected links, briefly replaced by a flash ----
 let flashing = false;
 
@@ -188,6 +289,19 @@ api.contextMenus.onClicked.addListener(async (info, tab) => {
       found.push(...((results && results[0] && results[0].result) || []));
     } catch (e) {
       console.error("KKAFIO: could not read selection", e);
+    }
+  }
+
+  // TeraBox: highlighted file / folder rows -> one link each (see extractTeraboxItems)
+  if (info.selectionText) {
+    try {
+      const results = await api.scripting.executeScript({
+        target: { tabId: tab.id, frameIds: [info.frameId || 0] },
+        func: extractTeraboxItems,
+      });
+      found.push(...((results && results[0] && results[0].result) || []));
+    } catch (e) {
+      console.error("KKAFIO: could not read TeraBox rows", e);
     }
   }
 

@@ -16,6 +16,7 @@ See [CHANGELOG.md](CHANGELOG.md) for version history.
   - **Base64-encoded links are decoded**: highlight text such as `aHR0cHM6Ly9nb2ZpbGUuaW8vZC9qcFB3QkRoWA==` (also double-encoded) and it is saved as the decoded URL, if the domain is allowed.
   - **Links inside buttons and other elements**: URLs in attributes such as `onclick="window.open('…')"` or `data-href` are found when the element is part of your selection.
   - **Right-click a button directly** (no highlighting needed) on `kknow.cc`.
+  - **TeraBox files and folders**: on a TeraBox share page, highlight the names of the files (or folders) you want in the file list, right-click → *Extract links with KKAFIO Link Collector*. Each one becomes its own link (`…/sharing/link?surl=<id>&path=<path>`) that KKAFIO's Download Contents downloads on its own. Needs a KKAFIO version that supports `path=` links to files.
 - **Duplicates are skipped** automatically.
 - **Translations**: English, 简体中文, 繁體中文, 日本語, 한국어, Русский (follows the browser language).
 
@@ -31,10 +32,11 @@ See [CHANGELOG.md](CHANGELOG.md) for version history.
 | gofile.io | ✅ floating button on `/d/ID` | ✅ |
 | drive.google.com | ✅ floating button on files and folders | ✅ |
 | catbox.moe | ✅ floating button on `files.catbox.moe/…` and `/c/ID` | ✅ |
+| terabox.com (and mirrors such as 1024tera.com) | – | ✅ highlight file / folder names in a share; see notes |
 | kknow.cc | – | ✅ including right-clicking a button directly |
 | any other site | – | ✅ for allowed domains only |
 
-Right-click extraction keeps only links on these domains (and their subdomains): `pixiv.net`, `pawchive.pw`, `koikatsucards.com`, `bepis.moe`, `gofile.io`, `mega.nz`, `mega.io`, `mega.co.nz`, `drive.google.com`, `drive.usercontent.google.com`, `catbox.moe`.
+Right-click extraction keeps only links on these domains (and their subdomains): `pixiv.net`, `pawchive.pw`, `koikatsucards.com`, `bepis.moe`, `gofile.io`, `mega.nz`, `mega.io`, `mega.co.nz`, `drive.google.com`, `drive.usercontent.google.com`, `catbox.moe`, and TeraBox (`terabox.com`, `terabox.app`, `1024tera.com`, `1024terabox.com`, `teraboxapp.com`, `nephobox.com` and a few more mirrors).
 
 ## Installation
 
@@ -98,6 +100,7 @@ _locales/            Translations
 
 ## Notes and limitations
 
+- **TeraBox:** a file has no link of its own, so the extension builds one from the share id in the address bar plus the item's path, read from the page's folder tree or breadcrumbs (`.file-item-name`, `.breadcrumb-item` and `.webmaster-file-item-wrapper` elements). If TeraBox changes its page markup, this stops working until the selectors in `extractTeraboxItems()` (`background.js`) are updated. Highlight the names of the items (a drag over several rows works); the share must be open with `surl=` in the address bar or as `/s/1…`.
 - Buttons are drawn in a separate overlay on top of the page, rather than inside the site's own elements. This avoids breaking sites built with frameworks like React (such as Pixiv).
 - URLs that a page builds with JavaScript at click time (for example `window.open(atob(...))`) are not in the HTML and cannot be extracted.
 - Base64 decoding only applies to highlighted text; encoded values hidden inside element attributes are not decoded.
