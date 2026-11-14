@@ -12,6 +12,23 @@ function teraboxLink(fullPath) {
   return u.origin + "/sharing/link?surl=" + encodeURIComponent(surl) + "&path=" + enc;
 }
 
+// MEGA public folder: link to one node of the folder you are browsing.
+// Needs the folder's root id + key, taken from the current URL.
+function megaNodeLink(id, kind) {
+  if (!id || !/^[\w-]{8}$/.test(id)) return null;
+  let root, key;
+  const m = location.pathname.match(/^\/folder\/([\w-]{8})/);
+  if (m) {
+    root = m[1];
+    key = location.hash.replace(/^#/, "").split("/")[0];
+  } else {
+    const l = location.hash.match(/^#F!([\w-]{8})!([\w-]+)/); // legacy folder link
+    if (l) { root = l[1]; key = l[2]; }
+  }
+  if (!root || !key) return null; // not inside a public folder link
+  return location.origin + "/folder/" + root + "#" + key + "/" + kind + "/" + id;
+}
+
 // ====== SITE CONFIG — edit these if a site's URL structure differs ======
 const SITES = [
   {
@@ -81,6 +98,35 @@ const SITES = [
       const ok = /^\/(file|folder)\/[^/?#]+\/?$/.test(u.pathname) || /^#F?!/.test(u.hash);
       return ok ? u.origin + u.pathname + u.search + u.hash : null;
     },
+    // Inside a public folder link every file/folder row (list view and tile view)
+    // gets its own button; the link is <folder link>#KEY/file/HANDLE or /folder/HANDLE.
+    rows: {
+      selector: "tr.megaListItem[id], a.mega-node.megaListItem[id]",
+      name: (row) => {
+        const n = row.querySelector(".tranfer-filetype-txt, .fm-item-name");
+        return n ? n.textContent.trim() : "";
+      },
+      place: (row, r) => {
+        if (row.tagName === "TR") {
+          const td = row.querySelector('td[megatype="fname"]');
+          const tr = td ? td.getBoundingClientRect() : r;
+          return { x: tr.right - 36, y: r.top + (r.height - 28) / 2 };
+        }
+        return { x: r.left + 6, y: r.top + (r.height - 28) / 2 }; // tile: left edge, middle
+      },
+      url: (name, row) => megaNodeLink(row.id, row.classList.contains("folder") ? "folder" : "file"),
+    },
+    // A file opened in MEGA's preview viewer gets the floating button.
+    single: () => {
+      const v = document.querySelector(".media-viewer-container:not(.hidden)");
+      if (!v) return null;
+      const w = v.querySelector(".img-wrap[data-image]");
+      const fn = v.querySelector(".file-info .file-name");
+      let id = w && w.dataset.image;
+      if (!id) { const m = location.hash.match(/\/file\/([\w-]{8})/); id = m && m[1]; }
+      const url = megaNodeLink(id, "file");
+      return url ? { url, title: (fn && fn.textContent.trim()) || id } : null;
+    },
   },
   {
     host: /(^|\.)gofile\.io$/,
@@ -127,6 +173,12 @@ const SITES = [
       name: (row) => {
         const n = row.querySelector(".file-item-name");
         return n ? n.textContent.trim() : "";
+      },
+      // button sits just left of the size/time columns, vertically centred
+      place: (row, r) => {
+        const right = row.querySelector(".right");
+        const rr = right ? right.getBoundingClientRect() : r;
+        return { x: rr.left - 36, y: r.top + (r.height - 28) / 2 };
       },
       url: (name) => {
         const dir = (new URL(location.href).searchParams.get("path") || "/").replace(/\/+$/, "");
@@ -319,14 +371,12 @@ function update() {
       if (r.width < 50 || r.height < 10 || r.bottom < -M || r.top > vh + M) return;
       if (!isShown(row)) return;
       const name = cfg.name(row);
-      const url = cfg.url(name);
+      const url = cfg.url(name, row);
       if (!url) return;
-      // button sits just left of the size/time columns, vertically centred
-      const right = row.querySelector(".right");
-      const rr = right ? right.getBoundingClientRect() : r;
-      const x = Math.round(rr.left - o.left - 36);
-      const y = Math.round(r.top - o.top + (r.height - 28) / 2);
-      if (isClipped(row, { left: x + o.left - 6, top: r.top + (r.height - 28) / 2 - 6 }, clipCache)) return;
+      const pos = cfg.place(row, r); // viewport coords of the button's top-left
+      const x = Math.round(pos.x - o.left);
+      const y = Math.round(pos.y - o.top);
+      if (isClipped(row, { left: pos.x - 6, top: pos.y - 6 }, clipCache)) return;
       const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
       if (cx >= 0 && cy >= 0 && cx <= vw && cy <= vh) {
         const el = document.elementFromPoint(cx, cy);
