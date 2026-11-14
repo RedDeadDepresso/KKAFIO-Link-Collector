@@ -30,11 +30,12 @@ See [CHANGELOG.md](CHANGELOG.md) for version history.
 | mega.nz | ✅ floating button on `/file/…#key`, `/folder/…#key` | ✅ |
 | gofile.io | ✅ **+** on every file row, plus floating button on `/d/ID` | ✅ |
 | drive.google.com | ✅ **+** on every file/folder row (list and grid view), plus floating button on files and folders | ✅ |
+| pixeldrain.com | ✅ **+** on every album tile and every file inside an archive listing, plus floating button on `/u/ID`, `/l/ID` and the selected album file | ✅ |
 | catbox.moe | ✅ floating button on `files.catbox.moe/…` and `/c/ID` | ✅ |
 | kknow.cc | – | ✅ including right-clicking a button directly |
 | any other site | – | ✅ for allowed domains only |
 
-Right-click extraction keeps only links on these domains (and their subdomains): `pixiv.net`, `pawchive.pw`, `koikatsucards.com`, `bepis.moe`, `gofile.io`, `mega.nz`, `mega.io`, `mega.co.nz`, `drive.google.com`, `drive.usercontent.google.com`, `catbox.moe`.
+Right-click extraction keeps only links on these domains (and their subdomains): `pixiv.net`, `pawchive.pw`, `koikatsucards.com`, `bepis.moe`, `gofile.io`, `mega.nz`, `mega.io`, `mega.co.nz`, `drive.google.com`, `drive.usercontent.google.com`, `catbox.moe`, `pixeldrain.com`.
 
 ## Installation
 

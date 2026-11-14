@@ -212,6 +212,47 @@ const SITES = [
     },
   },
   {
+    // Pixeldrain: /u/ID (single file) and /l/ID (list / album).
+    // List pages: a + button on every gallery tile (link = /u/FILEID), and on
+    // every entry of the "Files in this archive" tree (link = the entry's
+    // own /api/file/ID/info/zip/... download URL). Opening one file of a list
+    // (#item=N) gets a floating button for that file.
+    host: /(^|\.)pixeldrain\.(com|net|dev)$/,
+    match: () => null,
+    noSearch: true,
+    page: (u) => {
+      const m = u.pathname.match(/^\/[ul]\/[^/?#]+/);
+      return m ? u.origin + m[0] : null;
+    },
+    rows: {
+      selector: 'a.file[href^="#item="], .file_preview li',
+      name: (row) => {
+        if (row.tagName === "A") return row.textContent.trim();
+        const n = row.querySelector(".filename");
+        return n ? n.textContent.replace(/\s*\(.*$/s, "").trim() : "";
+      },
+      place: (row, r) => {
+        if (row.tagName === "A") return { x: r.left + 6, y: r.top + 6 }; // tile: top-left
+        return { x: r.right - 34, y: r.top + (r.height - 28) / 2 };     // archive entry: right end
+      },
+      url: (name, row) => {
+        if (row.tagName === "A") {
+          const ic = row.querySelector(".icon_container");
+          const m = ic && (ic.style.backgroundImage || "").match(/\/api\/file\/([\w-]+)\//);
+          return m ? location.origin + "/u/" + m[1] : null;
+        }
+        const a = row.querySelector('a[href*="/info/zip/"]');
+        return a ? a.href : null;
+      },
+    },
+    single: () => {
+      if (!/^\/l\//.test(location.pathname)) return null;
+      const img = document.querySelector(".list_navigator .file_selected img");
+      const m = img && (img.getAttribute("src") || "").match(/\/api\/file\/([\w-]+)\//);
+      return m ? { url: location.origin + "/u/" + m[1], title: img.alt || m[1] } : null;
+    },
+  },
+  {
     host: /(^|\.)catbox\.moe$/,
     match: () => null,
     noSearch: true,

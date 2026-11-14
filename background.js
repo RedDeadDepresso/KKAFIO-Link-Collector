@@ -14,6 +14,9 @@ const ALLOWED_DOMAINS = [
   "drive.google.com",
   "drive.usercontent.google.com",
   "catbox.moe",
+  "pixeldrain.com",
+  "pixeldrain.net",
+  "pixeldrain.dev",
 ];
 
 function isAllowed(url) {

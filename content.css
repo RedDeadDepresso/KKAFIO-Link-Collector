@@ -30,3 +30,22 @@
 .content-grid .card:hover {
   transform: none !important;
 }
+
+/* Some sites (e.g. Pixeldrain) style every <button> as inline-flex with their own
+   padding/margins, which pushes the + to the left. Force true centering. */
+.lc-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  text-align: center !important;
+  line-height: 1 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  text-indent: 0 !important;
+  letter-spacing: normal !important;
+}
+.lc-btn:not(.lc-float) { width: 28px !important; height: 28px !important; }
+.lc-float { padding: 8px 14px !important; white-space: nowrap; }
