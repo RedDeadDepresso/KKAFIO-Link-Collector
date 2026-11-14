@@ -12,6 +12,33 @@ function teraboxLink(fullPath) {
   return u.origin + "/sharing/link?surl=" + encodeURIComponent(surl) + "&path=" + enc;
 }
 
+// Current folder path of a TeraBox share page. The address bar is NOT updated
+// when you open a subfolder, so read it from the page itself.
+function teraboxCurrentDir() {
+  // 1) breadcrumb: "All content / Cards / Alucid" (can be shortened with an ellipsis item)
+  const crumbs = document.querySelectorAll(".breadcrumb-nav .breadcrumb-item");
+  if (crumbs.length && !document.querySelector(".breadcrumb-nav .breadcrumb-item.ellipsis")) {
+    const parts = [...crumbs]
+      .filter((c) => !c.classList.contains("root-name"))
+      .map((c) => c.textContent.trim())
+      .filter(Boolean);
+    return parts.length ? "/" + parts.join("/") : "";
+  }
+  // 2) sidebar tree: walk up from the selected folder
+  const sel = document.querySelector(".webmaster-file-item.is-selected.is-folder");
+  if (sel) {
+    const parts = [];
+    for (let w = sel.closest(".webmaster-file-item-wrapper"); w;
+         w = w.parentElement && w.parentElement.closest(".webmaster-file-item-wrapper")) {
+      const n = w.querySelector(":scope > .webmaster-file-item .file-item-name");
+      if (n) parts.unshift(n.textContent.trim());
+    }
+    if (parts.length) return "/" + parts.join("/");
+  }
+  // 3) fall back to the URL
+  return (new URL(location.href).searchParams.get("path") || "").replace(/\/+$/, "");
+}
+
 // MEGA public folder: link to one node of the folder you are browsing.
 // Needs the folder's root id + key, taken from the current URL.
 function megaNodeLink(id, kind) {
@@ -335,10 +362,7 @@ const SITES = [
         const rr = right ? right.getBoundingClientRect() : r;
         return { x: rr.left - 36, y: r.top + (r.height - 28) / 2 };
       },
-      url: (name) => {
-        const dir = (new URL(location.href).searchParams.get("path") || "/").replace(/\/+$/, "");
-        return teraboxLink(dir + "/" + name);
-      },
+      url: (name) => teraboxLink(teraboxCurrentDir() + "/" + name),
     },
     // Single-file view (a folder with one item opens the file directly, no list rows).
     // The sidebar tree marks the containing folder as selected; the file is its child.
