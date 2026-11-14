@@ -28,7 +28,7 @@ See [CHANGELOG.md](CHANGELOG.md) for version history.
 | koikatsucards.com | ✅ (any image link; see notes) | ✅ |
 | db.bepis.moe | ✅ `/GAME/view/ID` | ✅ |
 | mega.nz | ✅ floating button on `/file/…#key`, `/folder/…#key` | ✅ |
-| gofile.io | ✅ floating button on `/d/ID` | ✅ |
+| gofile.io | ✅ **+** on every file row, plus floating button on `/d/ID` | ✅ |
 | drive.google.com | ✅ floating button on files and folders | ✅ |
 | catbox.moe | ✅ floating button on `files.catbox.moe/…` and `/c/ID` | ✅ |
 | kknow.cc | – | ✅ including right-clicking a button directly |

@@ -137,6 +137,31 @@ const SITES = [
       const m = u.pathname.match(/^\/d\/[^/?#]+/);
       return m ? u.origin + m[0] : null;
     },
+    // A + button on every FILE row inside a folder (sub-folder rows are skipped:
+    // their row id is an internal UUID, not a shareable /d/CODE).
+    // Gofile has no per-file page, so the link is <folder link>#<file id>.
+    // Still a valid gofile.io/d/CODE link, and unique per file so each can be
+    // collected / removed on its own. Change the format in `url` if you prefer.
+    rows: {
+      selector: '.fm-row[data-type="file"][data-id]',
+      name: (row) => {
+        const n = row.querySelector("p.font-medium");
+        return n ? n.textContent.trim() : "";
+      },
+      // sits just left of the Download / Preview buttons (desktop) or the
+      // ⋮ menu (mobile), aligned with the top of the row so it stays put on
+      // rows that show a big thumbnail
+      place: (row, r) => {
+        const acts = row.lastElementChild;
+        const ar = acts ? acts.getBoundingClientRect() : r;
+        const desktop = matchMedia("(min-width: 1024px)").matches;
+        return { x: ar.left - 34, y: ar.top + (desktop ? 3 : 8) };
+      },
+      url: (name, row) => {
+        const base = canonicalPage(location.href);
+        return base && row.dataset.id ? base + "#" + row.dataset.id : null;
+      },
+    },
   },
   {
     host: /^drive\.google\.com$/,
