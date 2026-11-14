@@ -1,0 +1,13 @@
+/* koikatsucards.com ad removal */
+.nav-ad-slot,
+.nav-ad-pill,
+.self-sticky-ad,
+a[href^="/go/ad/"],
+a[href*="koikatsucards.com/go/ad/"],
+ins.adsbygoogle,
+iframe[src*="googlesyndication"],
+iframe[src*="exoclick"],
+iframe[src*="exosrv"],
+iframe[src*="magsrv"] {
+  display: none !important;
+}

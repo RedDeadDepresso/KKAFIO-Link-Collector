@@ -579,6 +579,7 @@ function update() {
     if (site.rows) return;
     const img = a.querySelector("img");
     if (!img) return;
+    if (/\/go\/ad\//.test(a.href)) return; // never put a + on ads
     const r = img.getBoundingClientRect();
     if (r.width < 50 || r.height < 50 || r.bottom < -M || r.top > vh + M || r.right < -M || r.left > vw + M) return;
     if (!isShown(img) || isCovered(a, r)) return; // hidden posts get no button
