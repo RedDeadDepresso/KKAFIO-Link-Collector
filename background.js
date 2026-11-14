@@ -17,6 +17,7 @@ const ALLOWED_DOMAINS = [
   "pixeldrain.com",
   "pixeldrain.net",
   "pixeldrain.dev",
+  "mediafire.com",
 ];
 
 function isAllowed(url) {

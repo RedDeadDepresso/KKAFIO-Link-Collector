@@ -253,6 +253,60 @@ const SITES = [
     },
   },
   {
+    // MediaFire. A shared folder (/folder/KEY) is a thin shell page whose file list
+    // lives in an iframe (/apps/myfiles/?sharekey=KEY), so this script also runs
+    // inside that iframe (see the all_frames entry in manifest.json):
+    //  - top page   -> floating button for /folder/KEY or /file/KEY/name/file
+    //  - the iframe -> a + button on every file row (folders are skipped)
+    host: /(^|\.)mediafire\.com$/,
+    match: () => null,
+    noSearch: true,
+    page: (u) => {
+      if (window !== window.top) return null; // only the top page gets the floating button
+      const f = u.pathname.match(/^\/(folder)\/([\w]+)/);
+      if (f) return u.origin + "/folder/" + f[2];
+      const m = u.pathname.match(/^\/(file|file_premium|view)\/([\w]+)(?:\/([^/]+)\/file)?/);
+      if (m) return u.origin + "/file/" + m[2] + (m[3] ? "/" + m[3] + "/file" : "");
+      return null;
+    },
+    // Rows verified against the real shared-folder markup:
+    //   <li class="row_container mf_filecontainer file" data-key="QUICKKEY">
+    //     ... <div class="btns_column">...</div> ... <span class="item-name">name</span>
+    // Folder rows are <li class="... folder" data-key="FOLDERKEY"> and get a /folder/KEY link.
+    rows: {
+      selector: "li.mf_filecontainer[data-key]", // files and folders
+      name: (row) => {
+        const n = row.querySelector(".item-name");
+        return n ? n.textContent.trim() : "";
+      },
+      // The row's action buttons (.btns_column) only show on hover, so never anchor to
+      // them (the + would jump around). Anchor to the always-visible details column
+      // (date / size / downloads) instead; checkboxes live on the far left, so stay off it.
+      place: (row, r) => {
+        const fm = row.querySelector(".file_maindetails");
+        const fr = fm ? fm.getBoundingClientRect() : null;
+        if (fr && fr.width > 0 && r.width > 400) {
+          // right of the date/size/downloads column. Left of it sits the "copy link"
+          // icon (.itemStatus), so never go there.
+          let x = fr.right + 6;
+          if (x + 28 > r.right - 2) x = r.right - 30; // not enough room: hug the row's right edge
+          return { x, y: r.top + (r.height - 28) / 2 };
+        }
+        if (r.width > 400) return { x: r.right - 90, y: r.top + (r.height - 28) / 2 };
+        return { x: r.right - 34, y: r.top + 6 }; // grid tile: top-right
+      },
+      url: (name, row) => {
+        const key = row.dataset.key;
+        if (!key || !/^\w{8,20}$/.test(key)) return null;
+        const clean = (name || "").replace(/[\/?#]/g, "");
+        if (row.classList.contains("folder")) {
+          return "https://www.mediafire.com/folder/" + key + (clean ? "/" + encodeURIComponent(clean) : "");
+        }
+        return "https://www.mediafire.com/file/" + key + (clean ? "/" + encodeURIComponent(clean) : "") + "/file";
+      },
+    },
+  },
+  {
     host: /(^|\.)catbox\.moe$/,
     match: () => null,
     noSearch: true,

@@ -77,6 +77,22 @@
     },
     {
       "matches": [
+        "*://mediafire.com/*",
+        "*://*.mediafire.com/*"
+      ],
+      "js": [
+        "i18n.js",
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
+      "all_frames": true,
+      "match_about_blank": false,
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
         "*://kknow.cc/*",
         "*://*.kknow.cc/*"
       ],

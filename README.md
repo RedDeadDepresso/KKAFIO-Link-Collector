@@ -31,11 +31,12 @@ See [CHANGELOG.md](CHANGELOG.md) for version history.
 | gofile.io | ✅ **+** on every file row, plus floating button on `/d/ID` | ✅ |
 | drive.google.com | ✅ **+** on every file/folder row (list and grid view), plus floating button on files and folders | ✅ |
 | pixeldrain.com | ✅ **+** on every album tile and every file inside an archive listing, plus floating button on `/u/ID`, `/l/ID` and the selected album file | ✅ |
+| mediafire.com | ✅ **+** on file and folder rows of shared folders (list lives in an iframe), floating button on `/folder/KEY` and `/file/KEY/...` | ✅ |
 | catbox.moe | ✅ floating button on `files.catbox.moe/…` and `/c/ID` | ✅ |
 | kknow.cc | – | ✅ including right-clicking a button directly |
 | any other site | – | ✅ for allowed domains only |
 
-Right-click extraction keeps only links on these domains (and their subdomains): `pixiv.net`, `pawchive.pw`, `koikatsucards.com`, `bepis.moe`, `gofile.io`, `mega.nz`, `mega.io`, `mega.co.nz`, `drive.google.com`, `drive.usercontent.google.com`, `catbox.moe`, `pixeldrain.com`.
+Right-click extraction keeps only links on these domains (and their subdomains): `pixiv.net`, `pawchive.pw`, `koikatsucards.com`, `bepis.moe`, `gofile.io`, `mega.nz`, `mega.io`, `mega.co.nz`, `drive.google.com`, `drive.usercontent.google.com`, `catbox.moe`, `pixeldrain.com`, `mediafire.com`.
 
 ## Installation
 
