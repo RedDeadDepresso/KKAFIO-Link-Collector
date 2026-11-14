@@ -116,6 +116,16 @@
       "all_frames": true,
       "match_about_blank": true,
       "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "*://kk.now.cc/*",
+        "*://*.kk.now.cc/*"
+      ],
+      "js": [
+        "redirect.js"
+      ],
+      "run_at": "document_start"
     }
   ],
   "browser_specific_settings": {
