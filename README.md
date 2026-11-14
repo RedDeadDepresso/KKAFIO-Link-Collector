@@ -29,7 +29,7 @@ See [CHANGELOG.md](CHANGELOG.md) for version history.
 | db.bepis.moe | ✅ `/GAME/view/ID` | ✅ |
 | mega.nz | ✅ floating button on `/file/…#key`, `/folder/…#key` | ✅ |
 | gofile.io | ✅ **+** on every file row, plus floating button on `/d/ID` | ✅ |
-| drive.google.com | ✅ floating button on files and folders | ✅ |
+| drive.google.com | ✅ **+** on every file/folder row (list and grid view), plus floating button on files and folders | ✅ |
 | catbox.moe | ✅ floating button on `files.catbox.moe/…` and `/c/ID` | ✅ |
 | kknow.cc | – | ✅ including right-clicking a button directly |
 | any other site | – | ✅ for allowed domains only |

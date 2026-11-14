@@ -175,6 +175,41 @@ const SITES = [
       const rk = u.searchParams.get("resourcekey");
       return u.origin + m[0] + (rk ? "?resourcekey=" + encodeURIComponent(rk) : "");
     },
+    // A + button on every file/folder in list view (table rows) AND grid view
+    // (cards). Both carry the Drive id in data-id. Folders are told apart by
+    // their icon: file icons are branded SVGs with a <title> (e.g. "Microsoft
+    // Word"), the plain folder icon has none.
+    rows: {
+      selector: 'tr[role="row"][data-id][data-target="doc"], div[role="gridcell"][data-selectable][data-id]',
+      name: (row) => {
+        const n = row.querySelector("strong, .MxB3Nd");
+        return n ? n.textContent.trim() : "";
+      },
+      place: (row, r) => {
+        if (row.tagName === "TR") { // list view: right end of the Name column
+          const td = row.querySelector('td[data-column-field="6"]');
+          const tr = td ? td.getBoundingClientRect() : r;
+          return { x: tr.right - 40, y: r.top + (r.height - 28) / 2 };
+        }
+        // grid view: in the card header, just left of the "more actions" button
+        const head = row.querySelector(".goen0e");
+        const hr = head ? head.getBoundingClientRect() : r;
+        const more = row.querySelector(".K7P0Qd");
+        const mr = more ? more.getBoundingClientRect() : { left: r.right - 8 };
+        return { x: mr.left - 34, y: hr.top + (hr.height - 28) / 2 };
+      },
+      url: (name, row) => {
+        const id = row.dataset.id;
+        if (!id) return null;
+        const svg = row.querySelector("[data-file-icon] svg, .RlzxUb svg");
+        const isFolder = svg ? !svg.querySelector("title") : false;
+        const rk = new URL(location.href).searchParams.get("resourcekey");
+        const q = rk ? "?resourcekey=" + encodeURIComponent(rk) : "";
+        return isFolder
+          ? "https://drive.google.com/drive/folders/" + id + q
+          : "https://drive.google.com/file/d/" + id + "/view" + q;
+      },
+    },
   },
   {
     host: /(^|\.)catbox\.moe$/,
