@@ -1,3 +1,17 @@
+// TeraBox: build a share link for a full path like /Cards/Alucid/file.png
+function teraboxLink(fullPath) {
+  const u = new URL(location.href);
+  let surl = u.searchParams.get("surl");
+  if (!surl) { const m = u.pathname.match(/^\/s\/1([^/?#]+)/); if (m) surl = m[1]; }
+  if (!surl) { // fall back to the page's canonical / og:url
+    const c = document.querySelector('link[rel="canonical"]');
+    try { surl = c && new URL(c.href).searchParams.get("surl"); } catch {}
+  }
+  if (!surl || !fullPath) return null;
+  const enc = fullPath.split("/").map(encodeURIComponent).join("/");
+  return u.origin + "/sharing/link?surl=" + encodeURIComponent(surl) + "&path=" + enc;
+}
+
 // ====== SITE CONFIG — edit these if a site's URL structure differs ======
 const SITES = [
   {
@@ -102,6 +116,54 @@ const SITES = [
       return null;
     },
   },
+  {
+    // TeraBox share pages: a collect button on every file/folder row.
+    // Rows have no link of their own, so one is built from the share id (surl)
+    // plus the current folder path and the row's name.
+    host: /(^|\.)(1024tera|terabox|1024terabox|teraboxapp|terabox1024|freeterabox|4funbox|mirrobox|momerybox|nephobox|tibibox|gibibox)\.(com|app)$/,
+    match: () => null,
+    rows: {
+      selector: ".file-item-listmode",
+      name: (row) => {
+        const n = row.querySelector(".file-item-name");
+        return n ? n.textContent.trim() : "";
+      },
+      url: (name) => {
+        const dir = (new URL(location.href).searchParams.get("path") || "/").replace(/\/+$/, "");
+        return teraboxLink(dir + "/" + name);
+      },
+    },
+    // Single-file view (a folder with one item opens the file directly, no list rows).
+    // The sidebar tree marks the containing folder as selected; the file is its child.
+    single: () => {
+      if (document.querySelector(".file-item-listmode")) return null; // normal list view
+      const sel = document.querySelector(".webmaster-file-item.is-selected");
+      if (!sel) return null;
+      const nameOf = (w) => {
+        const n = w.querySelector(":scope > .webmaster-file-item .file-item-name");
+        return n ? n.textContent.trim() : "";
+      };
+      const wrap = sel.closest(".webmaster-file-item-wrapper");
+      let file, folder;
+      if (!sel.classList.contains("is-folder")) {
+        // folder with several items: the clicked file itself is marked as selected
+        file = wrap;
+        folder = wrap.parentElement && wrap.parentElement.closest(".webmaster-file-item-wrapper");
+      } else {
+        // folder with one item: the folder is marked and the file is its only file child
+        const files = [...wrap.querySelectorAll(":scope > .children-list > .webmaster-file-item-wrapper")]
+          .filter((w) => !w.querySelector(":scope > .webmaster-file-item.is-folder"));
+        file = files.find((w) => nameOf(w) === document.title.trim()) || (files.length === 1 ? files[0] : null);
+        folder = wrap;
+      }
+      if (!file) return null;
+      const parts = [nameOf(file)];
+      for (let w = folder; w; w = w.parentElement && w.parentElement.closest(".webmaster-file-item-wrapper")) {
+        parts.unshift(nameOf(w));
+      }
+      return { url: teraboxLink("/" + parts.filter(Boolean).join("/")), title: parts[parts.length - 1] };
+    },
+  },
 ];
 // ========================================================================
 
@@ -141,7 +203,7 @@ async function toggle(url, btn) {
   const links = await getLinks();
   const i = links.findIndex((l) => l.url === url);
   if (i >= 0) links.splice(i, 1);
-  else links.push({ url, title: document.title, added: Date.now() });
+  else links.push({ url, title: (btn && btn.dataset.title) || document.title, added: Date.now() });
   await setLinks(links);
 }
 
@@ -250,7 +312,42 @@ function update() {
   // (page coordinates) and the browser moves them natively while scrolling.
   const ov = getOverlay();
   const o = ov.getBoundingClientRect();
+  if (site.rows) {
+    const cfg = site.rows;
+    document.querySelectorAll(cfg.selector).forEach((row) => {
+      const r = row.getBoundingClientRect();
+      if (r.width < 50 || r.height < 10 || r.bottom < -M || r.top > vh + M) return;
+      if (!isShown(row)) return;
+      const name = cfg.name(row);
+      const url = cfg.url(name);
+      if (!url) return;
+      // button sits just left of the size/time columns, vertically centred
+      const right = row.querySelector(".right");
+      const rr = right ? right.getBoundingClientRect() : r;
+      const x = Math.round(rr.left - o.left - 36);
+      const y = Math.round(r.top - o.top + (r.height - 28) / 2);
+      if (isClipped(row, { left: x + o.left - 6, top: r.top + (r.height - 28) / 2 - 6 }, clipCache)) return;
+      const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      if (cx >= 0 && cy >= 0 && cx <= vw && cy <= vh) {
+        const el = document.elementFromPoint(cx, cy);
+        if (el && !row.contains(el) && !el.closest("#lc-overlay")) return; // covered by a dialog
+      }
+      let b = tracked.get(row);
+      if (!b || !b.isConnected || b.dataset.url !== url) {
+        if (b) b.remove();
+        b = makeBtn(url, false);
+        b.dataset.title = name;
+        ov.appendChild(b);
+        tracked.set(row, b);
+      }
+      if (b._x !== x) { b.style.left = x + "px"; b._x = x; }
+      if (b._y !== y) { b.style.top = y + "px"; b._y = y; }
+      seen.add(row);
+    });
+  }
+
   document.querySelectorAll("a[href]").forEach((a) => {
+    if (site.rows) return;
     const img = a.querySelector("img");
     if (!img) return;
     const r = img.getBoundingClientRect();
@@ -277,11 +374,18 @@ function update() {
   }
 
   // floating button on the post page itself
-  const cur = canonicalPage(location.href);
+  const one = site.single ? site.single() : null;
+  const cur = one ? one.url : canonicalPage(location.href);
   const f = document.querySelector(".lc-float");
-  if (cur && !f) document.body.appendChild(makeBtn(cur, true));
-  else if (cur && f && f.dataset.url !== cur) { f.dataset.url = cur; paint(f); }
-  else if (!cur && f) f.remove();
+  if (cur && !f) {
+    const nb = makeBtn(cur, true);
+    if (one) nb.dataset.title = one.title;
+    document.body.appendChild(nb);
+  } else if (cur && f && f.dataset.url !== cur) {
+    f.dataset.url = cur;
+    if (one) f.dataset.title = one.title; else delete f.dataset.title;
+    paint(f);
+  } else if (!cur && f) f.remove();
 }
 
 let queued = false;
