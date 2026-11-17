@@ -49,5 +49,8 @@
   },
   "badgeDup": {
     "message": "重複"
+  },
+  "kkPost": {
+    "message": "作品"
   }
 }

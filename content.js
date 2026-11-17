@@ -60,6 +60,7 @@ function megaNodeLink(id, kind) {
 const SITES = [
   {
     host: /(^|\.)pixiv\.net$/,
+    kk: true, // also show koikatsucards / Bepis / Pawchive matches (kk.js, slim.json)
     // thumbnails + post pages: /artworks/123 and /en/artworks/123 -> canonical link
     match: (u) => {
       const m = u.pathname.match(/^\/(?:[a-z]{2}(?:_[a-z]{2})?\/)?artworks\/(\d+)/);
@@ -462,6 +463,7 @@ function makeBtn(url, floating) {
 // Thumbnail buttons live in their own overlay on <body>, positioned over the
 // images (in page coordinates, so they scroll smoothly with the page). We never modify the site's own elements (that breaks React pages).
 const tracked = new Map(); // anchor -> button
+const trackedKK = new Map(); // anchor -> "KK" badge (pixiv only, see kk.js)
 const urlCache = new Map();
 let overlay;
 
@@ -521,6 +523,7 @@ function isClipped(img, r, cache) {
 function purgeStale() {
   document.querySelectorAll("#lc-overlay").forEach((o) => { if (!o._lc) o.remove(); });
   document.querySelectorAll(".lc-btn").forEach((b) => { if (!b._lc) b.remove(); });
+  document.querySelectorAll(".kk-badge, .kk-panel").forEach((b) => { if (!b._lc) b.remove(); });
   const floats = [...document.querySelectorAll(".lc-float")];
   floats.slice(1).forEach((b) => b.remove());
 }
@@ -529,6 +532,9 @@ function purgeStale() {
 function removeUI() {
   tracked.forEach((b) => b.remove());
   tracked.clear();
+  trackedKK.forEach((b) => b.remove());
+  trackedKK.clear();
+  if (site.kk) KK.removePanel();
   document.querySelectorAll(".lc-float").forEach((b) => b.remove());
   if (overlay) overlay.remove();
   overlay = null;
@@ -538,6 +544,7 @@ function update() {
   purgeStale();
   const vw = innerWidth, vh = innerHeight, M = 400; // render a bit beyond the viewport
   const seen = new Set();
+  const seenKK = new Set();
   const clipCache = new Map(); // ancestor -> clip rect (or null), per pass
   // The overlay scrolls with the page, so buttons are placed relative to it
   // (page coordinates) and the browser moves them natively while scrolling.
@@ -598,9 +605,30 @@ function update() {
     if (b._x !== x) { b.style.left = x + "px"; b._x = x; }
     if (b._y !== y) { b.style.top = y + "px"; b._y = y; }
     seen.add(a);
+    // pixiv: mark posts that exist on koikatsucards (bottom-left of the thumbnail)
+    if (site.kk && KK.ready()) {
+      const href = KK.postHref(KK.postId(url));
+      if (href) {
+        let kb = trackedKK.get(a);
+        if (!kb || !kb.isConnected || kb.dataset.kk !== href) {
+          if (kb) kb.remove();
+          kb = KK.makeBadge(href);
+          ov.appendChild(kb);
+          trackedKK.set(a, kb);
+        }
+        const kx = Math.round(r.left - o.left + 6);
+        const ky = Math.round(r.bottom - o.top - 26);
+        if (kb._x !== kx) { kb.style.left = kx + "px"; kb._x = kx; }
+        if (kb._y !== ky) { kb.style.top = ky + "px"; kb._y = ky; }
+        seenKK.add(a);
+      }
+    }
   });
   for (const [a, b] of tracked) {
     if (!seen.has(a)) { b.remove(); tracked.delete(a); }
+  }
+  for (const [a, b] of trackedKK) {
+    if (!seenKK.has(a)) { b.remove(); trackedKK.delete(a); }
   }
 
   // floating button on the post page itself
@@ -616,6 +644,9 @@ function update() {
     if (one) f.dataset.title = one.title; else delete f.dataset.title;
     paint(f);
   } else if (!cur && f) f.remove();
+
+  // pixiv: artist / post matches for the page being viewed
+  if (site.kk) KK.syncPanel();
 }
 
 let queued = false;
@@ -632,6 +663,7 @@ function refresh() {
 async function init() {
   if (!site) return;
   collected = new Set((await getLinks()).map((l) => l.url));
+  if (site.kk) { KK.onChange(schedule); KK.load(); }
   update();
   new MutationObserver((records) => {
     // ignore changes made by our own overlay

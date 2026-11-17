@@ -49,5 +49,8 @@
   },
   "badgeDup": {
     "message": "дубл."
+  },
+  "kkPost": {
+    "message": "Пост"
   }
 }

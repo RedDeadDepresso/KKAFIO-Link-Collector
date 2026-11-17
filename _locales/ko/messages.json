@@ -49,5 +49,8 @@
   },
   "badgeDup": {
     "message": "중복"
+  },
+  "kkPost": {
+    "message": "게시물"
   }
 }

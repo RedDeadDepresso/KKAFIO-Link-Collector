@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "__MSG_extName__",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "__MSG_extDescription__",
   "homepage_url": "https://github.com/RedDeadDepresso/KKAFIO-Link-Collector",
   "permissions": [
@@ -9,6 +9,9 @@
     "contextMenus",
     "activeTab",
     "scripting"
+  ],
+  "host_permissions": [
+    "https://raw.githubusercontent.com/RedDeadDepresso/kk-author-scraper/*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -37,7 +40,6 @@
     },
     {
       "matches": [
-        "*://*.pixiv.net/*",
         "*://pawchive.pw/*",
         "*://*.pawchive.pw/*",
         "*://koikatsucards.com/*",
@@ -82,6 +84,20 @@
       ],
       "js": [
         "i18n.js",
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "*://*.pixiv.net/*"
+      ],
+      "js": [
+        "i18n.js",
+        "kk.js",
         "content.js"
       ],
       "css": [
