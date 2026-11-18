@@ -10,10 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Pixiv: thumbnails of posts that exist on koikatsucards.com get a small **KK** badge linking to the post.
 - Pixiv artwork and artist pages: links to the artist's koikatsucards.com author page, Bepis author page(s) and Pawchive creator, when they are known.
-- The lookup data (`slim.json`, from [kk-author-scraper](https://github.com/RedDeadDepresso/kk-author-scraper)) is downloaded in the background at most twice a day and stored locally.
+- The lookup data (`lookup.json`, from [kk-author-scraper](https://github.com/RedDeadDepresso/kk-author-scraper)) is downloaded in the background at most twice a day and stored locally.
 
 ### Changed
-- New host permission: `raw.githubusercontent.com/RedDeadDepresso/kk-author-scraper/*` (only used to download `slim.json`).
+- New host permission: `reddeaddepresso.github.io/kk-author-scraper/indices/lookup.json` (only used to download `lookup.json`).
 
 ## [1.4.0]
 

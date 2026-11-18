@@ -60,7 +60,7 @@ function megaNodeLink(id, kind) {
 const SITES = [
   {
     host: /(^|\.)pixiv\.net$/,
-    kk: true, // also show koikatsucards / Bepis / Pawchive matches (kk.js, slim.json)
+    kk: true, // also show koikatsucards / Bepis / Pawchive matches (kk.js, lookup.json)
     // thumbnails + post pages: /artworks/123 and /en/artworks/123 -> canonical link
     match: (u) => {
       const m = u.pathname.match(/^\/(?:[a-z]{2}(?:_[a-z]{2})?\/)?artworks\/(\d+)/);

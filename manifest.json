@@ -11,7 +11,7 @@
     "scripting"
   ],
   "host_permissions": [
-    "https://raw.githubusercontent.com/RedDeadDepresso/kk-author-scraper/*"
+    "https://reddeaddepresso.github.io/kk-author-scraper/indices/lookup.json"
   ],
   "action": {
     "default_popup": "popup.html",

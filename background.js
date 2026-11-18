@@ -232,16 +232,16 @@ api.contextMenus.onClicked.addListener(async (info, tab) => {
 });
 
 // ---------------------------------------------------------------------------
-// slim.json: which Pixiv posts / artists exist on koikatsucards, Bepis and Pawchive.
+// lookup.json: which Pixiv posts / artists exist on koikatsucards, Bepis and Pawchive.
 // Built by https://github.com/RedDeadDepresso/kk-author-scraper, downloaded here and
-// kept in storage.local["slim"] for kk.js. Nothing about the user is sent.
+// kept in storage.local["lookup"] for kk.js. Nothing about the user is sent.
 // ---------------------------------------------------------------------------
-const SLIM_URL = "https://raw.githubusercontent.com/RedDeadDepresso/kk-author-scraper/refs/heads/main/data/slim.json";
-const SLIM_MAX_AGE = 12 * 60 * 60 * 1000; // re-check at most twice a day
-const SLIM_RETRY = 10 * 60 * 1000;        // after a failed attempt wait before trying again
-let slimJob = null;
+const LOOKUP_URL = "https://reddeaddepresso.github.io/kk-author-scraper/indices/lookup.json";
+const LOOKUP_MAX_AGE = 12 * 60 * 60 * 1000; // re-check at most twice a day
+const LOOKUP_RETRY = 10 * 60 * 1000;        // after a failed attempt wait before trying again
+let lookupJob = null;
 
-function validSlim(d) {
+function validLookup(d) {
   return !!d && d.version === 1 && Array.isArray(d.posts) && !!d.users && typeof d.users === "object";
 }
 
@@ -250,39 +250,39 @@ async function sha256Hex(text) {
   return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-async function refreshSlim() {
-  const { slimMeta } = await api.storage.local.get({ slimMeta: null });
-  const meta = slimMeta || { fetchedAt: 0, lastAttempt: 0, hash: "" };
+async function refreshLookup() {
+  const { lookupMeta } = await api.storage.local.get({ lookupMeta: null });
+  const meta = lookupMeta || { fetchedAt: 0, lastAttempt: 0, hash: "" };
   const now = Date.now();
-  if (now - meta.fetchedAt < SLIM_MAX_AGE || now - meta.lastAttempt < SLIM_RETRY) return;
+  if (now - meta.fetchedAt < LOOKUP_MAX_AGE || now - meta.lastAttempt < LOOKUP_RETRY) return;
 
-  await api.storage.local.set({ slimMeta: { ...meta, lastAttempt: now } });
+  await api.storage.local.set({ lookupMeta: { ...meta, lastAttempt: now } });
   try {
     // "no-cache" makes the browser revalidate (ETag) instead of re-downloading an unchanged file,
     // without adding request headers that would need a CORS preflight.
-    const res = await fetch(SLIM_URL, { cache: "no-cache" });
+    const res = await fetch(LOOKUP_URL, { cache: "no-cache" });
     if (!res.ok) throw new Error("HTTP " + res.status);
     const text = await res.text();
     const data = JSON.parse(text);
-    if (!validSlim(data)) throw new Error("unexpected slim.json format");
+    if (!validLookup(data)) throw new Error("unexpected lookup.json format");
     const hash = await sha256Hex(text);
-    if (hash !== meta.hash) await api.storage.local.set({ slim: data }); // only wakes the pages when it changed
-    await api.storage.local.set({ slimMeta: { fetchedAt: now, lastAttempt: now, hash } });
+    if (hash !== meta.hash) await api.storage.local.set({ lookup: data }); // only wakes the pages when it changed
+    await api.storage.local.set({ lookupMeta: { fetchedAt: now, lastAttempt: now, hash } });
   } catch (e) {
-    console.warn("KKAFIO: could not update slim.json", e);
+    console.warn("KKAFIO: could not update lookup.json", e);
   }
 }
 
-function ensureSlim() {
-  if (!slimJob) slimJob = refreshSlim().finally(() => { slimJob = null; });
-  return slimJob;
+function ensureLookup() {
+  if (!lookupJob) lookupJob = refreshLookup().finally(() => { lookupJob = null; });
+  return lookupJob;
 }
 
-api.runtime.onInstalled.addListener(ensureSlim);
-api.runtime.onStartup.addListener(ensureSlim);
+api.runtime.onInstalled.addListener(ensureLookup);
+api.runtime.onStartup.addListener(ensureLookup);
 api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg && msg.type === "kkafio-slim-refresh") {
-    ensureSlim().then(() => sendResponse(true), () => sendResponse(false));
+  if (msg && msg.type === "kkafio-lookup-refresh") {
+    ensureLookup().then(() => sendResponse(true), () => sendResponse(false));
     return true; // keep the channel open for the async answer
   }
 });

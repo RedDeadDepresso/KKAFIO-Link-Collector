@@ -1,7 +1,7 @@
 // KKAFIO: knows which Pixiv posts and artists exist on koikatsucards.com, Bepis and Pawchive.
 //
-// The data is slim.json (https://github.com/RedDeadDepresso/kk-author-scraper). background.js
-// downloads it and keeps it in chrome.storage.local["slim"]; this file only reads it.
+// The data is lookup.json (https://github.com/RedDeadDepresso/kk-author-scraper). background.js
+// downloads it and keeps it in chrome.storage.local["lookup"]; this file only reads it.
 // Shape (version 1):
 //   urls:    URL templates ({id} {slug} {name} {service}); only known hosts are accepted
 //   posts:   [pixiv post ids present on koikatsucards]
@@ -30,16 +30,16 @@ const KK = (() => {
   const fill = (tpl, vars) =>
     tpl.replace(/\{(\w+)\}/g, (_, k) => encodeURIComponent(vars[k] === undefined ? "" : vars[k]));
 
-  function ingest(slim) {
-    if (!slim || slim.version !== 1 || !Array.isArray(slim.posts) || !slim.users || typeof slim.users !== "object") {
+  function ingest(lookup) {
+    if (!lookup || lookup.version !== 1 || !Array.isArray(lookup.posts) || !lookup.users || typeof lookup.users !== "object") {
       return false;
     }
-    st.posts = new Set(slim.posts);
-    st.users = slim.users;
-    st.authors = slim.authors && typeof slim.authors === "object" ? slim.authors : {};
+    st.posts = new Set(lookup.posts);
+    st.users = lookup.users;
+    st.authors = lookup.authors && typeof lookup.authors === "object" ? lookup.authors : {};
     const urls = { ...DEFAULT_URLS };
     for (const k of Object.keys(DEFAULT_URLS)) {
-      const v = slim.urls && slim.urls[k];
+      const v = lookup.urls && lookup.urls[k];
       if (typeof v === "string" && ALLOWED_URL.test(v)) urls[k] = v;
     }
     st.urls = urls;
@@ -48,14 +48,14 @@ const KK = (() => {
   }
 
   function load() {
-    chrome.storage.local.get({ slim: null }, (d) => {
-      if (d.slim && ingest(d.slim)) onChangeCb();
+    chrome.storage.local.get({ lookup: null }, (d) => {
+      if (d.lookup && ingest(d.lookup)) onChangeCb();
     });
     // background.js refreshes the file at most every few hours; this only wakes it up
-    try { chrome.runtime.sendMessage({ type: "kkafio-slim-refresh" }, () => void chrome.runtime.lastError); } catch {}
+    try { chrome.runtime.sendMessage({ type: "kkafio-lookup-refresh" }, () => void chrome.runtime.lastError); } catch {}
   }
   chrome.storage.onChanged.addListener((c, area) => {
-    if (area === "local" && c.slim && c.slim.newValue && ingest(c.slim.newValue)) onChangeCb();
+    if (area === "local" && c.lookup && c.lookup.newValue && ingest(c.lookup.newValue)) onChangeCb();
   });
 
   // Post id from a pixiv artwork link
