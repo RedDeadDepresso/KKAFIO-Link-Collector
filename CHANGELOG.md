@@ -5,30 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.5.0]
+## [1.2.0]
 
 ### Added
+- TeraBox share pages: a collect button on every file/folder row, and a floating **Collect link** button on the single-file view.
+- Gofile folders: a **+** collect button on every file row (links are saved as `gofile.io/d/CODE#FILEID`).
+- koikatsucards.com: hides ads, blocks pop-under tabs, and no longer adds a **+** to ad links.
 - Pixiv: thumbnails of posts that exist on koikatsucards.com get a small **KK** badge linking to the post.
 - Pixiv artwork and artist pages: links to the artist's koikatsucards.com author page, Bepis author page(s) and Pawchive creator, when they are known.
 - The lookup data (`lookup.json`, from [kk-author-scraper](https://github.com/RedDeadDepresso/kk-author-scraper)) is downloaded in the background at most twice a day and stored locally.
 
 ### Changed
 - New host permission: `reddeaddepresso.github.io/kk-author-scraper/indices/lookup.json` (only used to download `lookup.json`).
-
-## [1.4.0]
-
-### Added
-- koikatsucards.com: hides ads, blocks pop-under tabs, and no longer adds a **+** to ad links.
-
-## [1.3.0]
-
-### Added
-- Gofile folders: a **+** collect button on every file row (links are saved as `gofile.io/d/CODE#FILEID`).
-
-## [1.2.0]
-
-### Added
-- TeraBox share pages: a collect button on every file/folder row, and a floating **Collect link** button on the single-file view.
 
 ## [1.1.0]
 
