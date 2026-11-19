@@ -18,7 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - New host permission: `reddeaddepresso.github.io/kk-author-scraper/indices/lookup.json` (only used to download `lookup.json`).
-- New permission `declarativeNetRequest`, with host access to `*.pximg.net` and `reddeaddepresso.github.io`, used only to set the `Referer` header on Pixiv images requested by kk-authors.
+- New permission `declarativeNetRequest`, with host access to `*.pximg.net` and `reddeaddepresso.github.io`, used to set the `Referer` header on Pixiv images requested by kk-authors, and to redirect `kk.now.cc` (and subdomains) to `kknow.cc`.
+- The `kk.now.cc` → `kknow.cc` redirect now uses declarativeNetRequest instead of a content script, so it happens before the page loads. Host access to `kk.now.cc` was added for this.
 
 ## [1.1.0]
 

@@ -14,7 +14,9 @@
   "host_permissions": [
     "https://reddeaddepresso.github.io/kk-author-scraper/indices/lookup.json",
     "https://*.pximg.net/*",
-    "https://reddeaddepresso.github.io/*"
+    "https://reddeaddepresso.github.io/*",
+    "*://kk.now.cc/*",
+    "*://*.kk.now.cc/*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -135,16 +137,6 @@
       "all_frames": true,
       "match_about_blank": true,
       "run_at": "document_start"
-    },
-    {
-      "matches": [
-        "*://kk.now.cc/*",
-        "*://*.kk.now.cc/*"
-      ],
-      "js": [
-        "redirect.js"
-      ],
-      "run_at": "document_start"
     }
   ],
   "browser_specific_settings": {
@@ -176,6 +168,11 @@
         "id": "pximg_referer",
         "enabled": true,
         "path": "referer-rules.json"
+      },
+      {
+        "id": "kknow_redirect",
+        "enabled": true,
+        "path": "redirect-rules.json"
       }
     ]
   }

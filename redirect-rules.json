@@ -1,0 +1,26 @@
+[
+  {
+    "id": 2,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": { "regexSubstitution": "\\1://kknow.cc\\3" }
+    },
+    "condition": {
+      "regexFilter": "^(https?)://kk\\.now\\.cc(:[0-9]+)?(/.*)?$",
+      "resourceTypes": ["main_frame", "sub_frame"]
+    }
+  },
+  {
+    "id": 3,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": { "regexSubstitution": "\\1://\\2.kknow.cc\\4" }
+    },
+    "condition": {
+      "regexFilter": "^(https?)://([^/:]+)\\.kk\\.now\\.cc(:[0-9]+)?(/.*)?$",
+      "resourceTypes": ["main_frame", "sub_frame"]
+    }
+  }
+]
