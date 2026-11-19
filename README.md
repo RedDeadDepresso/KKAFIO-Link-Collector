@@ -107,6 +107,7 @@ _locales/            Translations
 | `storage` | Save the collected links locally |
 | `contextMenus` | Add the right-click option |
 | `activeTab`, `scripting` | Read your text selection when you use the right-click option |
+| `declarativeNetRequest`, `pximg.net` + `reddeaddepresso.github.io` access | Set the `Referer` header on Pixiv images loaded by the kk-authors page so they are not blocked |
 | Site access (`matches`) | Show the collect buttons on the supported sites only, and track the right-clicked element on `kknow.cc` |
 
 ## Notes and limitations

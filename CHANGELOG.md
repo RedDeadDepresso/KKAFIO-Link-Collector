@@ -14,9 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pixiv: thumbnails of posts that exist on koikatsucards.com get a small **KK** badge linking to the post.
 - Pixiv artwork and artist pages: links to the artist's koikatsucards.com author page, Bepis author page(s) and Pawchive creator, when they are known.
 - The lookup data (`lookup.json`, from [kk-author-scraper](https://github.com/RedDeadDepresso/kk-author-scraper)) is downloaded in the background at most twice a day and stored locally.
+- Pixiv images (`pximg.net`) shown on [kk-authors](https://reddeaddepresso.github.io/kk-authors/) are no longer blocked: the extension sets the `Referer` header to `https://www.pixiv.net/` for those image requests only.
 
 ### Changed
 - New host permission: `reddeaddepresso.github.io/kk-author-scraper/indices/lookup.json` (only used to download `lookup.json`).
+- New permission `declarativeNetRequest`, with host access to `*.pximg.net` and `reddeaddepresso.github.io`, used only to set the `Referer` header on Pixiv images requested by kk-authors.
 
 ## [1.1.0]
 
