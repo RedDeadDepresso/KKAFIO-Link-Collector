@@ -137,6 +137,15 @@
       "all_frames": true,
       "match_about_blank": true,
       "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "*://web.telegram.org/*"
+      ],
+      "js": [
+        "telegram.js"
+      ],
+      "run_at": "document_idle"
     }
   ],
   "browser_specific_settings": {

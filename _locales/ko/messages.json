@@ -52,5 +52,8 @@
   },
   "kkPost": {
     "message": "게시물"
+  },
+  "kkTelegram": {
+    "message": "검색"
   }
 }

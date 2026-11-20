@@ -16,6 +16,7 @@ const KK = (() => {
   };
   // The file comes from the network, so it may never point links anywhere else.
   const ALLOWED_URL = /^https:\/\/(?:koikatsucards\.com|db\.bepis\.moe|pawchive\.pw)\//;
+  const TELEGRAM_URL = "https://web.telegram.org/k/";
   const LANG = "(?:[a-z]{2}(?:_[a-z]{2})?\\/)?";
   const ARTWORK_PATH = new RegExp("^\\/" + LANG + "artworks\\/(\\d+)");
   const USER_PATH = new RegExp("^\\/" + LANG + "users\\/(\\d+)");
@@ -80,10 +81,22 @@ const KK = (() => {
     return a;
   }
 
-  function chip(tag, text, href, title) {
+  // Telegram Web can't be searched through a URL, so the query is handed to telegram.js
+  // (content script on web.telegram.org) through storage, then Telegram Web is opened.
+  function rememberTelegramQuery(query) {
+    try { chrome.storage.local.set({ tgSearch: { query, ts: Date.now() } }); } catch {}
+  }
+
+  function chip(tag, text, href, title, tgQuery) {
     const a = document.createElement("a");
     a.className = "kk-chip";
     a.href = href;
+    if (tgQuery) {
+      // just store the query; the link itself (target=_blank) opens Telegram Web as usual
+      const store = () => rememberTelegramQuery(tgQuery);
+      a.addEventListener("click", store);
+      a.addEventListener("auxclick", store); // middle click
+    }
     a.target = "_blank";
     a.rel = "noopener noreferrer";
     a.title = title;
@@ -147,6 +160,13 @@ const KK = (() => {
         });
       }
     }
+    // Telegram: search for this Pixiv page's link (works without lookup.json)
+    if (art || usr) {
+      const query = art
+        ? "https://www.pixiv.net/artworks/" + art[1]
+        : "https://www.pixiv.net/users/" + usr[1];
+      items.push({ tag: "Telegram", text: t("kkTelegram"), href: TELEGRAM_URL, title: "web.telegram.org", query });
+    }
     return items;
   }
 
@@ -156,16 +176,16 @@ const KK = (() => {
   }
 
   function syncPanel() {
-    const items = st.ready ? pageItems() : [];
+    const items = pageItems();
     if (!items.length) return removePanel();
-    const sig = items.map((i) => i.tag + i.href).join("|");
+    const sig = items.map((i) => i.tag + i.href + (i.query || "")).join("|");
     if (panel && panel.isConnected && panel.dataset.sig === sig) return;
     removePanel();
     panel = document.createElement("div");
     panel._lc = true;
     panel.className = "kk-panel";
     panel.dataset.sig = sig;
-    for (const i of items) panel.appendChild(chip(i.tag, i.text, i.href, i.title));
+    for (const i of items) panel.appendChild(chip(i.tag, i.text, i.href, i.title, i.query));
     document.body.appendChild(panel);
   }
 

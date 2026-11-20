@@ -16,7 +16,8 @@ const KKAFIO_FALLBACK = {
   "collectFloat": "+ Collect link",
   "collectedFloat": "✓ Collected",
   "badgeDup": "dup",
-  "kkPost": "Post"
+  "kkPost": "Post",
+  "kkTelegram": "Search"
 };
 
 function t(key, ...subs) {

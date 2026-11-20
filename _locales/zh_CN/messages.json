@@ -52,5 +52,8 @@
   },
   "kkPost": {
     "message": "作品"
+  },
+  "kkTelegram": {
+    "message": "搜索"
   }
 }

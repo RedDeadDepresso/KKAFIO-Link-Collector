@@ -52,5 +52,8 @@
   },
   "kkPost": {
     "message": "Post"
+  },
+  "kkTelegram": {
+    "message": "Search"
   }
 }
