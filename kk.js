@@ -23,6 +23,7 @@ const KK = (() => {
 
   const st = { ready: false, posts: new Set(), users: {}, authors: {}, urls: { ...DEFAULT_URLS } };
   const artistCache = new Map(); // artwork id -> pixiv user id (string) or null
+  const userNameCache = new Map(); // pixiv user id -> display name or null
   const pending = new Set();
   let onChangeCb = () => {};
   let panel = null;
@@ -162,9 +163,16 @@ const KK = (() => {
     }
     // Telegram + KKnow: search for this Pixiv page's link (works without lookup.json)
     if (art || usr) {
-      const query = art
+      // artwork page: search by the post link; user page: search by the artist's name
+      // (the link is used until the name has been fetched, or if it can't be)
+      let query = art
         ? "https://www.pixiv.net/artworks/" + art[1]
         : "https://www.pixiv.net/users/" + usr[1];
+      if (!art && usr) {
+        const name = userNameCache.get(usr[1]);
+        if (name) query = name;
+        else if (name === undefined) requestUserName(usr[1]);
+      }
       items.push({ tag: "Telegram", text: t("kkTelegram"), href: TELEGRAM_URL, title: "web.telegram.org", query });
       items.push({
         tag: "KKnow",
@@ -174,6 +182,18 @@ const KK = (() => {
       });
     }
     return items;
+  }
+
+  // Pixiv's own (same-origin) API gives the artist's display name for user pages.
+  function requestUserName(id) {
+    const key = "u" + id;
+    if (pending.has(key) || userNameCache.has(id)) return;
+    pending.add(key);
+    fetch("/ajax/user/" + id + "?full=0", { credentials: "same-origin", headers: { Accept: "application/json" } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => userNameCache.set(id, j && j.body && typeof j.body.name === "string" && j.body.name.trim() ? j.body.name.trim() : null))
+      .catch(() => userNameCache.set(id, null))
+      .finally(() => { pending.delete(key); onChangeCb(); });
   }
 
   function removePanel() {
