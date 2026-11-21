@@ -146,6 +146,15 @@
         "telegram.js"
       ],
       "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://reddeaddepresso.github.io/kk-authors/*"
+      ],
+      "js": [
+        "authors-site.js"
+      ],
+      "run_at": "document_start"
     }
   ],
   "browser_specific_settings": {
