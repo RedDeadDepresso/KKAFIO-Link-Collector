@@ -160,12 +160,18 @@ const KK = (() => {
         });
       }
     }
-    // Telegram: search for this Pixiv page's link (works without lookup.json)
+    // Telegram + KKnow: search for this Pixiv page's link (works without lookup.json)
     if (art || usr) {
       const query = art
         ? "https://www.pixiv.net/artworks/" + art[1]
         : "https://www.pixiv.net/users/" + usr[1];
       items.push({ tag: "Telegram", text: t("kkTelegram"), href: TELEGRAM_URL, title: "web.telegram.org", query });
+      items.push({
+        tag: "KKnow",
+        text: t("kkTelegram"), // "Search"
+        href: "https://kknow.cc/search/search/?keywords=" + encodeURIComponent(query) + "&order=date",
+        title: "kknow.cc",
+      });
     }
     return items;
   }
