@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - koikatsucards.com: hides ads, blocks pop-under tabs, and no longer adds a **+** to ad links.
 - Pixiv: thumbnails of posts that exist on koikatsucards.com get a small **KK** badge linking to the post.
 - Pixiv artwork and artist pages: links to the artist's koikatsucards.com author page, Bepis author page(s) and Pawchive creator, when they are known.
+- Pixiv artwork and artist pages: **Telegram** and **KKnow** search chips.
+  - On artwork pages they search for the post link (`pixiv.net/artworks/ID`); on artist pages they search for the artist's name.
+  - **KKnow** opens `kknow.cc/search/search/?keywords=…&order=date` in a new tab.
+  - **Telegram** opens Telegram Web (`web.telegram.org/k/`) and types the search into its search box (Telegram Web can't be searched through a URL, so a small script, `telegram.js`, does it once the page has loaded).
+- [kk-authors](https://reddeaddepresso.github.io/kk-authors/): the **Telegram** buttons on author cards open Telegram Web with the author's name, or their Telegram tag, already typed into the search box (`authors-site.js`). Without the extension the buttons simply open Telegram Web.
 - The lookup data (`lookup.json`, from [kk-author-scraper](https://github.com/RedDeadDepresso/kk-author-scraper)) is downloaded in the background at most twice a day and stored locally.
 - Pixiv images (`pximg.net`) shown on [kk-authors](https://reddeaddepresso.github.io/kk-authors/) are no longer blocked: the extension sets the `Referer` header to `https://www.pixiv.net/` for those image requests only.
 
@@ -20,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New host permission: `reddeaddepresso.github.io/kk-author-scraper/indices/lookup.json` (only used to download `lookup.json`).
 - New permission `declarativeNetRequest`, with host access to `*.pximg.net` and `reddeaddepresso.github.io`, used to set the `Referer` header on Pixiv images requested by kk-authors, and to redirect `kk.now.cc` (and subdomains) to `kknow.cc`.
 - The `kk.now.cc` → `kknow.cc` redirect now uses declarativeNetRequest instead of a content script, so it happens before the page loads. Host access to `kk.now.cc` was added for this.
+- New content scripts on `web.telegram.org` and `reddeaddepresso.github.io/kk-authors/`. They only read the search text saved when you click one of the buttons above (stored locally, valid for 5 minutes, removed after use).
 
 ## [1.1.0]
 
