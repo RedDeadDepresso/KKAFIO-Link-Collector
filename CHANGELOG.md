@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - TeraBox share pages: a collect button on every file/folder row, and a floating **Collect link** button on the single-file view.
 - Gofile folders: a **+** collect button on every file row (links are saved as `gofile.io/d/CODE#FILEID`).
-- koikatsucards.com: hides ads, blocks pop-under tabs, and no longer adds a **+** to ad links.
+- koikatsucards.com: hides ads (including the home page ad carousel and ad slots), blocks pop-under tabs, and no longer adds a **+** to ad links.
 - Pixiv: thumbnails of posts that exist on koikatsucards.com get a small **KK** badge linking to the post.
 - Pixiv artwork and artist pages: links to the artist's koikatsucards.com author page, Bepis author page(s) and Pawchive creator, when they are known.
 - Pixiv artwork and artist pages: **Telegram** and **KKnow** search chips.

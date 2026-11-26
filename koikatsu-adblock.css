@@ -1,5 +1,10 @@
 /* koikatsucards.com ad removal */
 .nav-ad-slot,
+.home-ad-carousel,
+.home-single-ad,
+.ad-mark,
+a[rel~="sponsored"],
+img[src*="/ad-creatives/"],
 .nav-ad-pill,
 .self-sticky-ad,
 a[href^="/go/ad/"],

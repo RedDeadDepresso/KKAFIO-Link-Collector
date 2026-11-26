@@ -19,7 +19,10 @@
   }, true);
 
   // Drop ad links the moment they appear.
+  // Skip the home carousel / single-ad slots here: React owns those nodes, so
+  // they are hidden with CSS instead (removing them can break hydration).
   const sweep = () => document.querySelectorAll('a[href*="/go/ad/"]').forEach((a) => {
+    if (a.closest(".home-ad-carousel, .home-single-ad")) return;
     (a.closest(".nav-ad-slot, .self-sticky-ad") || a).remove();
   });
   new MutationObserver(sweep).observe(document, { childList: true, subtree: true });
