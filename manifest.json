@@ -143,7 +143,12 @@
         "*://web.telegram.org/*"
       ],
       "js": [
-        "telegram.js"
+        "i18n.js",
+        "telegram.js",
+        "telegram-collect.js"
+      ],
+      "css": [
+        "telegram.css"
       ],
       "run_at": "document_idle"
     },

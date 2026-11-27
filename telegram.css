@@ -1,0 +1,20 @@
+/* "+" collect button on Telegram Web K messages (see telegram-collect.js).
+   It is a child of .bubble-content-wrapper, like Telegram's own forward button, which sits
+   on the right of incoming messages (and on the left of outgoing ones). We use the left. */
+.kk-tg-btn {
+  position: absolute; top: .375rem; right: calc(100% + .5rem); left: auto; bottom: auto;
+  z-index: 5; width: 1.75rem; height: 1.75rem; border-radius: 50%; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; padding: 0; margin: 0;
+  background: rgba(0,0,0,.55); color: #fff; font: 700 1rem/1 sans-serif;
+  opacity: .8; transition: transform .1s, background .1s;
+}
+/* outgoing messages already have Telegram's forward button on the left: sit beside it */
+.bubble.is-out .kk-tg-btn { right: calc(100% + 3.375rem); }
+.kk-tg-btn:hover { opacity: 1; transform: scale(1.1); }
+.kk-tg-btn.kk-tg-on { background: #1fa855; opacity: 1; }
+
+/* chats that show avatars reserve a 2.875rem gutter left of incoming messages for them:
+   move the button past it so it sits to the left of the avatar */
+.bubbles-inner.is-chat .is-in .kk-tg-btn,
+.bubbles-inner.with-message-avatars .is-in .kk-tg-btn,
+.bubble.is-guest-chat .kk-tg-btn { right: calc(100% + .5rem + 2.875rem); }
