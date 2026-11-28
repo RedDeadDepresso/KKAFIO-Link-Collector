@@ -64,5 +64,14 @@
   },
   "kkTelegram": {
     "message": "검색"
+  },
+  "passwordBtnTitle": {
+    "message": "압축 파일 비밀번호 (클릭하여 복사)"
+  },
+  "passwordFloat": {
+    "message": "비밀번호"
+  },
+  "passwordCopyTitle": {
+    "message": "클릭하여 복사"
   }
 }

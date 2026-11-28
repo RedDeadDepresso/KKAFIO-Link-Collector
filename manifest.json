@@ -46,8 +46,6 @@
     },
     {
       "matches": [
-        "*://pawchive.pw/*",
-        "*://*.pawchive.pw/*",
         "*://koikatsucards.com/*",
         "*://*.koikatsucards.com/*",
         "*://db.bepis.moe/*",
@@ -90,6 +88,21 @@
       ],
       "js": [
         "i18n.js",
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "*://pawchive.pw/*",
+        "*://*.pawchive.pw/*"
+      ],
+      "js": [
+        "i18n.js",
+        "passwords.js",
         "content.js"
       ],
       "css": [

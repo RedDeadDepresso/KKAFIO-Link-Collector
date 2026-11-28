@@ -288,6 +288,56 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 });
 
 // ---------------------------------------------------------------------------
+// posts.json: archive passwords per Patreon / Fanbox post id, shown on Pawchive (passwords.js).
+// Built by https://github.com/RedDeadDepresso/kk-password-scraper, downloaded here and kept
+// in storage.local["passwords"]. Shape: { "postId": [ { "f": filename, "p": password } ] }
+// Nothing about the user is sent.
+// ---------------------------------------------------------------------------
+const PASSWORDS_URL = "https://reddeaddepresso.github.io/kk-password-scraper/indices/posts.json";
+const PASSWORDS_MAX_AGE = 6 * 60 * 60 * 1000; // passwords are added often: re-check up to 4 times a day
+const PASSWORDS_RETRY = 10 * 60 * 1000;       // after a failed attempt wait before trying again
+let passwordsJob = null;
+
+function validPasswords(d) {
+  return !!d && typeof d === "object" && !Array.isArray(d);
+}
+
+async function refreshPasswords() {
+  const { passwordsMeta } = await api.storage.local.get({ passwordsMeta: null });
+  const meta = passwordsMeta || { fetchedAt: 0, lastAttempt: 0, hash: "" };
+  const now = Date.now();
+  if (now - meta.fetchedAt < PASSWORDS_MAX_AGE || now - meta.lastAttempt < PASSWORDS_RETRY) return;
+
+  await api.storage.local.set({ passwordsMeta: { ...meta, lastAttempt: now } });
+  try {
+    const res = await fetch(PASSWORDS_URL, { cache: "no-cache" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const text = await res.text();
+    const data = JSON.parse(text);
+    if (!validPasswords(data)) throw new Error("unexpected posts.json format");
+    const hash = await sha256Hex(text);
+    if (hash !== meta.hash) await api.storage.local.set({ passwords: data }); // only wakes the pages when it changed
+    await api.storage.local.set({ passwordsMeta: { fetchedAt: now, lastAttempt: now, hash } });
+  } catch (e) {
+    console.warn("KKAFIO: could not update posts.json", e);
+  }
+}
+
+function ensurePasswords() {
+  if (!passwordsJob) passwordsJob = refreshPasswords().finally(() => { passwordsJob = null; });
+  return passwordsJob;
+}
+
+api.runtime.onInstalled.addListener(ensurePasswords);
+api.runtime.onStartup.addListener(ensurePasswords);
+api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg && msg.type === "kkafio-passwords-refresh") {
+    ensurePasswords().then(() => sendResponse(true), () => sendResponse(false));
+    return true; // keep the channel open for the async answer
+  }
+});
+
+// ---------------------------------------------------------------------------
 // Telegram: open t.me links / searches in Telegram Web K, reusing an open tab.
 // (Approach taken from Telegram Web Link Handler.) kk.js sends the message when the
 // TG badge or a Telegram chip is clicked; no request interception is needed because

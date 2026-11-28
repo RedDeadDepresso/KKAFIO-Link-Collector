@@ -64,5 +64,14 @@
   },
   "kkTelegram": {
     "message": "搜尋"
+  },
+  "passwordBtnTitle": {
+    "message": "壓縮檔密碼(點擊複製)"
+  },
+  "passwordFloat": {
+    "message": "密碼"
+  },
+  "passwordCopyTitle": {
+    "message": "點擊複製"
   }
 }

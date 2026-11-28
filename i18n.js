@@ -20,7 +20,10 @@ const KKAFIO_FALLBACK = {
   "kkTgPost": "Post in chat",
   "kkTgUser": "Artist in chat",
   "kkTgBadge": "Seen in a Telegram chat",
-  "kkTelegram": "Search"
+  "kkTelegram": "Search",
+  "passwordBtnTitle": "Archive password (click to copy)",
+  "passwordFloat": "Password",
+  "passwordCopyTitle": "Click to copy"
 };
 
 function t(key, ...subs) {

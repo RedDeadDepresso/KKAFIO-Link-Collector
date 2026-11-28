@@ -64,5 +64,14 @@
   },
   "kkTelegram": {
     "message": "Search"
+  },
+  "passwordBtnTitle": {
+    "message": "Archive password (click to copy)"
+  },
+  "passwordFloat": {
+    "message": "Password"
+  },
+  "passwordCopyTitle": {
+    "message": "Click to copy"
   }
 }

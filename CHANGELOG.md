@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - koikatsucards.com: hides ads, blocks pop-under tabs, and no longer adds a **+** to ad links.
 - Pixiv images shown on kk-authors are no longer blocked (the `Referer` header is set for those requests only).
 - `lookup.json` ([kk-author-scraper](https://github.com/RedDeadDepresso/kk-author-scraper)) is downloaded at most twice a day and stored locally.
+- Pawchive: a 🔑 button next to the **+** on post cards and post pages shows the archive password on hover and copies it on click. The data is `posts.json` from [kk-password-scraper](https://github.com/RedDeadDepresso/kk-password-scraper), downloaded at most every 6 hours and stored locally.
 
 ### Changed
 - `kk.now.cc` (and subdomains) now redirect to `kknow.cc` before the page loads, using declarativeNetRequest instead of a content script.

@@ -64,5 +64,14 @@
   },
   "kkTelegram": {
     "message": "Поиск"
+  },
+  "passwordBtnTitle": {
+    "message": "Пароль архива (нажмите, чтобы скопировать)"
+  },
+  "passwordFloat": {
+    "message": "Пароль"
+  },
+  "passwordCopyTitle": {
+    "message": "Нажмите, чтобы скопировать"
   }
 }

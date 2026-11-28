@@ -64,5 +64,14 @@
   },
   "kkTelegram": {
     "message": "搜索"
+  },
+  "passwordBtnTitle": {
+    "message": "压缩包密码(点击复制)"
+  },
+  "passwordFloat": {
+    "message": "密码"
+  },
+  "passwordCopyTitle": {
+    "message": "点击复制"
   }
 }

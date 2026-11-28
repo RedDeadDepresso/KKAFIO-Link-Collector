@@ -64,5 +64,14 @@
   },
   "kkTelegram": {
     "message": "検索"
+  },
+  "passwordBtnTitle": {
+    "message": "アーカイブのパスワード(クリックでコピー)"
+  },
+  "passwordFloat": {
+    "message": "パスワード"
+  },
+  "passwordCopyTitle": {
+    "message": "クリックでコピー"
   }
 }

@@ -81,6 +81,7 @@ const SITES = [
   },
   {
     host: /(^|\.)pawchive\.pw$/,
+    passwords: true, // key button with the archive password (passwords.js, posts.json)
     // /SERVICE/user/ID  and  /SERVICE/user/ID/post/POSTID
     match: (u) => {
       const m = u.pathname.match(/^\/[^/]+\/user\/[^/]+(?:\/post\/[^/]+)?/);
@@ -400,6 +401,8 @@ const SITES = [
 // ========================================================================
 
 const site = SITES.find((s) => s.host.test(location.hostname));
+// passwords.js is only loaded on Pawchive (see manifest.json)
+const PWD = typeof PW !== "undefined" ? PW : null;
 let collected = new Set();
 
 const getLinks = () =>
@@ -463,6 +466,7 @@ function makeBtn(url, floating) {
 // Thumbnail buttons live in their own overlay on <body>, positioned over the
 // images (in page coordinates, so they scroll smoothly with the page). We never modify the site's own elements (that breaks React pages).
 const tracked = new Map(); // anchor -> button
+const trackedPW = new Map(); // anchor -> password button (Pawchive only, see passwords.js)
 const trackedKK = new Map(); // anchor -> "KK" badge (pixiv only, see kk.js)
 const trackedTG = new Map(); // anchor -> "TG" badge: the post was seen in a Telegram chat (pixiv only)
 const urlCache = new Map();
@@ -476,6 +480,12 @@ function getOverlay() {
     document.body.appendChild(overlay);
   }
   return overlay;
+}
+
+// Pawchive post id of a post card link (/SERVICE/user/ID/post/POSTID)
+function postIdOf(a) {
+  const m = (a.getAttribute("href") || "").match(/\/post\/(\d+)/);
+  return m ? m[1] : null;
 }
 
 function urlFor(a) {
@@ -525,6 +535,7 @@ function purgeStale() {
   document.querySelectorAll("#lc-overlay").forEach((o) => { if (!o._lc) o.remove(); });
   document.querySelectorAll(".lc-btn").forEach((b) => { if (!b._lc) b.remove(); });
   document.querySelectorAll(".kk-badge, .kk-panel").forEach((b) => { if (!b._lc) b.remove(); });
+  document.querySelectorAll(".lc-pw").forEach((b) => { if (!b._lc) b.remove(); });
   const floats = [...document.querySelectorAll(".lc-float")];
   floats.slice(1).forEach((b) => b.remove());
 }
@@ -537,8 +548,10 @@ function removeUI() {
   trackedKK.clear();
   trackedTG.forEach((b) => b.remove());
   trackedTG.clear();
+  trackedPW.forEach((b) => b.remove());
+  trackedPW.clear();
   if (site.kk) KK.removePanel();
-  document.querySelectorAll(".lc-float").forEach((b) => b.remove());
+  document.querySelectorAll(".lc-float, .lc-pw-float").forEach((b) => b.remove());
   if (overlay) overlay.remove();
   overlay = null;
 }
@@ -549,6 +562,7 @@ function update() {
   const seen = new Set();
   const seenKK = new Set();
   const seenTG = new Set();
+  const seenPW = new Set();
   const clipCache = new Map(); // ancestor -> clip rect (or null), per pass
   // The overlay scrolls with the page, so buttons are placed relative to it
   // (page coordinates) and the browser moves them natively while scrolling.
@@ -609,6 +623,25 @@ function update() {
     if (b._x !== x) { b.style.left = x + "px"; b._x = x; }
     if (b._y !== y) { b.style.top = y + "px"; b._y = y; }
     seen.add(a);
+    // pawchive: key button with the archive password, right of the collect button
+    if (site.passwords && PWD) {
+      const entries = PWD.get(postIdOf(a));
+      if (entries) {
+        const sig = JSON.stringify(entries);
+        let pb = trackedPW.get(a);
+        if (!pb || !pb.isConnected || pb.dataset.sig !== sig) {
+          if (pb) pb.remove();
+          pb = PWD.makeBtn(postIdOf(a), entries, false);
+          ov.appendChild(pb);
+          trackedPW.set(a, pb);
+        }
+        const px = Math.round(r.left - o.left + 6 + 34);
+        const py = Math.round(r.top - o.top + 6);
+        if (pb._x !== px) { pb.style.left = px + "px"; pb._x = px; }
+        if (pb._y !== py) { pb.style.top = py + "px"; pb._y = py; }
+        seenPW.add(a);
+      }
+    }
     // pixiv: mark posts that exist on koikatsucards (bottom-left of the thumbnail)
     if (site.kk && KK.ready()) {
       const href = KK.postHref(KK.postId(url));
@@ -653,6 +686,9 @@ function update() {
   for (const [a, b] of trackedTG) {
     if (!seenTG.has(a)) { b.remove(); trackedTG.delete(a); }
   }
+  for (const [a, b] of trackedPW) {
+    if (!seenPW.has(a)) { b.remove(); trackedPW.delete(a); }
+  }
 
   // floating button on the post page itself
   const one = site.single ? site.single() : null;
@@ -667,6 +703,19 @@ function update() {
     if (one) f.dataset.title = one.title; else delete f.dataset.title;
     paint(f);
   } else if (!cur && f) f.remove();
+
+  // pawchive post page: floating password button above the collect button
+  if (site.passwords && PWD) {
+    const m = location.pathname.match(/^\/[^/]+\/user\/[^/]+\/post\/(\d+)/);
+    const entries = m ? PWD.get(m[1]) : null;
+    const pf = document.querySelector(".lc-pw-float");
+    if (entries) {
+      const sig = JSON.stringify(entries);
+      if (pf && pf.dataset.sig !== sig) pf.remove();
+      if (!pf || pf.dataset.sig !== sig) document.body.appendChild(PWD.makeBtn(m[1], entries, true));
+      else if (pf.dataset.pw !== m[1]) { pf.remove(); document.body.appendChild(PWD.makeBtn(m[1], entries, true)); }
+    } else if (pf) pf.remove();
+  }
 
   // pixiv: artist / post matches for the page being viewed
   if (site.kk) KK.syncPanel();
@@ -687,6 +736,7 @@ async function init() {
   if (!site) return;
   collected = new Set((await getLinks()).map((l) => l.url));
   if (site.kk) { KK.onChange(schedule); KK.load(); }
+  if (site.passwords && PWD) { PWD.onChange(schedule); PWD.load(); }
   update();
   new MutationObserver((records) => {
     // ignore changes made by our own overlay

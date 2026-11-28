@@ -71,3 +71,53 @@
 .kk-chip:hover { background: rgba(0,0,0,.88); }
 .kk-chip .kk-tag { color: #ff8fb8; font-weight: 700; }
 .kk-chip .kk-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+
+/* pawchive: archive password (see passwords.js). Hover shows the password, click copies it. */
+.lc-pw {
+  position: absolute; top: 6px; left: 6px; z-index: 9999; pointer-events: auto;
+  width: 28px; height: 28px;
+}
+.lc-pw:hover, .lc-pw:focus-within { z-index: 10000; }
+.lc-pw-key {
+  display: flex !important; align-items: center !important; justify-content: center !important;
+  box-sizing: border-box !important; width: 28px !important; height: 28px !important;
+  min-width: 0 !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important;
+  border: none; border-radius: 50%; cursor: pointer; opacity: .85;
+  background: rgba(0,0,0,.65); color: #fff; font: 700 14px/1 sans-serif;
+  transition: transform .1s, background .1s;
+}
+.lc-pw:hover .lc-pw-key { opacity: 1; transform: scale(1.1); }
+.lc-pw-key.lc-pw-done, .lc-pw-row.lc-pw-done { background: #1fa855 !important; }
+.lc-pw-pop {
+  position: absolute; top: 0; left: 100%; display: flex; flex-direction: column; gap: 4px;
+  padding-left: 6px; /* bridges the gap so the list stays open while moving the mouse onto it */
+  visibility: hidden; opacity: 0; transition: opacity .1s;
+}
+.lc-pw:hover .lc-pw-pop, .lc-pw:focus-within .lc-pw-pop { visibility: visible; opacity: 1; }
+.lc-pw.lc-pw-flip .lc-pw-pop { left: auto; right: 100%; padding-left: 0; padding-right: 6px; align-items: flex-end; }
+.lc-pw-row {
+  display: flex !important; flex-direction: column; align-items: flex-start; gap: 2px;
+  box-sizing: border-box; width: max-content; min-width: 0 !important; max-width: 280px;
+  margin: 0 !important; padding: 5px 10px !important; border: none; border-radius: 14px; cursor: pointer;
+  background: rgba(0,0,0,.85); color: #fff; text-align: left;
+  font: 600 13px/1.2 sans-serif; letter-spacing: normal !important;
+}
+.lc-pw-row:hover { background: #000; }
+.lc-pw-val { font: 600 13px/1.2 ui-monospace, Consolas, monospace; white-space: nowrap; user-select: all; }
+.lc-pw-file { font: 400 10px/1.2 sans-serif; opacity: .7; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lc-pw-row.lc-pw-done .lc-pw-file { opacity: 1; }
+
+/* post page: floating pill above the floating collect button */
+.lc-pw.lc-pw-float {
+  position: fixed; top: auto; left: auto; right: 20px; bottom: 64px;
+  width: auto; height: auto; z-index: 2147483647;
+}
+.lc-pw-float .lc-pw-key {
+  width: auto !important; height: auto !important; border-radius: 20px;
+  padding: 8px 14px !important; font: 600 14px/1 sans-serif; white-space: nowrap;
+}
+.lc-pw-float .lc-pw-pop {
+  top: auto; bottom: 100%; left: auto; right: 0; align-items: flex-end;
+  padding: 0 0 6px 0;
+}
