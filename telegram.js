@@ -41,42 +41,65 @@
     return null;
   }
 
+  let busy = false; // one search at a time
+
+  // search for `query` in Telegram's search box
+  async function search(query) {
+    if (busy) return LOG("search already running");
+    busy = true;
+    try {
+      LOG("pending search:", query);
+
+      // wait for the app (and a login, if needed)
+      const input = await waitFor(() => { const i = document.querySelector(INPUT); return visible(i) ? i : null; }, MAX_WAIT);
+      if (!input) return LOG("gave up: search input never appeared");
+      await sleep(500); // let the app finish wiring its handlers
+
+      // 1) open the search panel (what a real click on the box does)
+      for (const step of [() => mouseClick(input), () => document.querySelector(TRIGGER)?.click(), () => input.focus()]) {
+        step();
+        if (await waitFor(searchOpen, 1200)) break;
+      }
+      LOG("search panel open:", searchOpen());
+
+      // 2) Enter in the empty box, as done by hand
+      const box = document.querySelector(INPUT) || input;
+      pressEnter(box);
+      await sleep(400);
+
+      // 3) type the link, 4) Enter
+      for (let i = 0; i < 6; i++) {
+        const el = document.querySelector(INPUT) || box;
+        if (setValue(el, query)) {
+          LOG("search text set");
+          await sleep(400);
+          pressEnter(el);
+          return LOG("pressed Enter");
+        }
+        await sleep(300);
+      }
+      LOG("could not set the search text");
+    } finally {
+      busy = false;
+    }
+  }
+
+  // Telegram Web was just opened by the Telegram chip: the query is waiting in storage
   async function run() {
     LOG("telegram.js loaded");
     const { tgSearch } = await api.storage.local.get({ tgSearch: null });
     if (!tgSearch || !tgSearch.query || Date.now() - tgSearch.ts > MAX_AGE) return LOG("nothing to search");
     await api.storage.local.remove("tgSearch"); // one-shot
-    LOG("pending search:", tgSearch.query);
-
-    // wait for the app (and a login, if needed)
-    const input = await waitFor(() => { const i = document.querySelector(INPUT); return visible(i) ? i : null; }, MAX_WAIT);
-    if (!input) return LOG("gave up: search input never appeared");
-    await sleep(500); // let the app finish wiring its handlers
-
-    // 1) open the search panel (what a real click on the box does)
-    for (const step of [() => mouseClick(input), () => document.querySelector(TRIGGER)?.click(), () => input.focus()]) {
-      step();
-      if (await waitFor(searchOpen, 1200)) break;
-    }
-    LOG("search panel open:", searchOpen());
-
-    // 2) Enter in the empty box, as done by hand
-    const box = document.querySelector(INPUT) || input;
-    pressEnter(box);
-    await sleep(400);
-
-    // 3) type the link, 4) Enter
-    for (let i = 0; i < 6; i++) {
-      const el = document.querySelector(INPUT) || box;
-      if (setValue(el, tgSearch.query)) {
-        LOG("search text set");
-        await sleep(400);
-        pressEnter(el);
-        return LOG("pressed Enter");
-      }
-      await sleep(300);
-    }
-    LOG("could not set the search text");
+    await search(tgSearch.query);
   }
+
+  // Telegram Web was already open: background.js asks for the search directly
+  api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (msg && msg.type === "kkafio-tg-search" && typeof msg.query === "string" && msg.query.trim()) {
+      search(msg.query).catch((e) => LOG("error", e));
+      sendResponse(true); // answer now; the search itself can take a while (login)
+    }
+  });
+
   run().catch((e) => LOG("error", e));
 })();

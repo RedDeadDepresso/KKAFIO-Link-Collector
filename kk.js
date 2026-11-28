@@ -111,25 +111,45 @@ const KK = (() => {
     a.classList.add("kk-badge-tg");
     a.title = t("kkTgBadge");
     a.textContent = "TG";
+    bindTelegram(a, { url: href });
     return a;
   }
 
   // Telegram Web can't be searched through a URL, so the query is handed to telegram.js
   // (content script on web.telegram.org) through storage, then Telegram Web is opened.
+  // Only used as a fallback now: background.js normally does this (see openTelegram there).
   function rememberTelegramQuery(query) {
     try { chrome.storage.local.set({ tgSearch: { query, ts: Date.now() } }); } catch {}
+  }
+
+  // t.me links would only land on the t.me landing page. Ask background.js to open them in
+  // Telegram Web instead (it reuses an already open Telegram Web tab). payload: { url } for a
+  // t.me message link, or { query } to search Telegram. If the extension can't be reached
+  // (e.g. it was just reloaded) the link behaves as before.
+  function bindTelegram(a, payload) {
+    const go = (e) => {
+      if (e.type === "click" ? e.button !== 0 : e.button !== 1) return; // left or middle click only
+      e.preventDefault();
+      e.stopPropagation();
+      const fallback = () => {
+        if (payload.query) rememberTelegramQuery(payload.query);
+        try { window.open(a.href, "_blank", "noopener,noreferrer"); } catch {}
+      };
+      try {
+        chrome.runtime.sendMessage({ type: "kkafio-open-tg", ...payload }, (ok) => {
+          if (chrome.runtime.lastError || !ok) fallback();
+        });
+      } catch { fallback(); }
+    };
+    a.addEventListener("click", go, true);
+    a.addEventListener("auxclick", go, true); // middle click
   }
 
   function chip(tag, text, href, title, tgQuery) {
     const a = document.createElement("a");
     a.className = "kk-chip";
     a.href = href;
-    if (tgQuery) {
-      // just store the query; the link itself (target=_blank) opens Telegram Web as usual
-      const store = () => rememberTelegramQuery(tgQuery);
-      a.addEventListener("click", store);
-      a.addEventListener("auxclick", store); // middle click
-    }
+    if (tag === "Telegram") bindTelegram(a, tgQuery ? { query: tgQuery } : { url: href });
     a.target = "_blank";
     a.rel = "noopener noreferrer";
     a.title = title;

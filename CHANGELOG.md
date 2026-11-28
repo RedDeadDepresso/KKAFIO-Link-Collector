@@ -8,27 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.0]
 
 ### Added
-- TeraBox share pages: a collect button on every file/folder row, and a floating **Collect link** button on the single-file view.
-- Gofile folders: a **+** collect button on every file row (links are saved as `gofile.io/d/CODE#FILEID`).
-- koikatsucards.com: hides ads (including the home page ad carousel and ad slots), blocks pop-under tabs, and no longer adds a **+** to ad links.
-- Pixiv: thumbnails of posts that exist on koikatsucards.com get a small **KK** badge linking to the post.
-- Pixiv: thumbnails of posts that were seen in a Telegram chat get a small **TG** badge (next to the **KK** badge) linking to the Telegram message.
-- Telegram Web (`web.telegram.org/k/`): a **+** button next to channel and supergroup messages collects the message link (`t.me/username/id`, or `t.me/c/channelid/id` when the username is not known); press again to remove it (`telegram-collect.js`).
-- Pixiv artwork and artist pages: links to the artist's koikatsucards.com author page, Bepis author page(s) and Pawchive creator, when they are known.
-- Pixiv artwork and artist pages: **Telegram** and **KKnow** search chips.
-  - On artwork pages they search for the post link (`pixiv.net/artworks/ID`); on artist pages they search for the artist's name.
-  - **KKnow** opens `kknow.cc/search/search/?keywords=…&order=date` in a new tab.
-  - **Telegram** opens Telegram Web (`web.telegram.org/k/`) and types the search into its search box (Telegram Web can't be searched through a URL, so a small script, `telegram.js`, does it once the page has loaded).
-- Pixiv artwork and artist pages: a **Telegram** chip linking to the message where the post, or the artist, was seen in a Telegram chat.
-- [kk-authors](https://reddeaddepresso.github.io/kk-authors/): the **Telegram** buttons on author cards open Telegram Web with the author's name, or their Telegram tag, already typed into the search box (`authors-site.js`). Without the extension the buttons simply open Telegram Web.
-- The lookup data (`lookup.json`, from [kk-author-scraper](https://github.com/RedDeadDepresso/kk-author-scraper)) is downloaded in the background at most twice a day and stored locally.
-- Pixiv images (`pximg.net`) shown on [kk-authors](https://reddeaddepresso.github.io/kk-authors/) are no longer blocked: the extension sets the `Referer` header to `https://www.pixiv.net/` for those image requests only.
+- Pixiv thumbnails: **KK** badge for posts on koikatsucards.com, and **TG** badge for posts seen in a Telegram chat.
+- Pixiv artwork and artist pages: chips linking to the artist's koikatsucards.com, Bepis and Pawchive pages, and to the Telegram message where the post or artist was seen (when known).
+- Pixiv artwork and artist pages: **Telegram** and **KKnow** search chips (post link on artwork pages, artist name on artist pages).
+- Telegram links and searches (**TG** badge, Telegram chips, kk-authors buttons) open directly in Telegram Web K and reuse an already open Telegram Web tab.
+- Telegram Web: a **+** button on channel and supergroup messages collects the message link.
+- [kk-authors](https://reddeaddepresso.github.io/kk-authors/): the **Telegram** buttons on author cards search Telegram Web for the author.
+- TeraBox share pages: collect button on every file/folder row, and a floating **Collect link** button on single files.
+- Gofile folders: collect button on every file row.
+- koikatsucards.com: hides ads, blocks pop-under tabs, and no longer adds a **+** to ad links.
+- Pixiv images shown on kk-authors are no longer blocked (the `Referer` header is set for those requests only).
+- `lookup.json` ([kk-author-scraper](https://github.com/RedDeadDepresso/kk-author-scraper)) is downloaded at most twice a day and stored locally.
 
 ### Changed
-- New host permission: `reddeaddepresso.github.io/kk-author-scraper/indices/lookup.json` (only used to download `lookup.json`).
-- New permission `declarativeNetRequest`, with host access to `*.pximg.net` and `reddeaddepresso.github.io`, used to set the `Referer` header on Pixiv images requested by kk-authors, and to redirect `kk.now.cc` (and subdomains) to `kknow.cc`.
-- The `kk.now.cc` → `kknow.cc` redirect now uses declarativeNetRequest instead of a content script, so it happens before the page loads. Host access to `kk.now.cc` was added for this.
-- New content scripts on `web.telegram.org` and `reddeaddepresso.github.io/kk-authors/`. They only read the search text saved when you click one of the buttons above (stored locally, valid for 5 minutes, removed after use).
+- `kk.now.cc` (and subdomains) now redirect to `kknow.cc` before the page loads, using declarativeNetRequest instead of a content script.
+- New permissions: `declarativeNetRequest`, and host access to `*.pximg.net`, `reddeaddepresso.github.io`, `kk.now.cc` and `web.telegram.org`.
+- New content scripts on `web.telegram.org` and kk-authors only read the search text saved when you click a Telegram button (stored locally, valid for 5 minutes, removed after use).
 
 ## [1.1.0]
 

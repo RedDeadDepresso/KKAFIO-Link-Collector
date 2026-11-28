@@ -286,3 +286,63 @@ api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true; // keep the channel open for the async answer
   }
 });
+
+// ---------------------------------------------------------------------------
+// Telegram: open t.me links / searches in Telegram Web K, reusing an open tab.
+// (Approach taken from Telegram Web Link Handler.) kk.js sends the message when the
+// TG badge or a Telegram chip is clicked; no request interception is needed because
+// those links are created by this extension. Needs the web.telegram.org host permission
+// so tabs.query can find existing tabs.
+// ---------------------------------------------------------------------------
+const TG_WEB = "https://web.telegram.org/k/";
+// same shape as kk.js builds: t.me/name/123, t.me/c/123456/123, t.me/name/42/123
+const TG_MSG_URL = /^https:\/\/t\.me\/(?:c\/\d{1,20}|[A-Za-z][A-Za-z0-9_]{3,31})(?:\/\d{1,10}){1,2}$/;
+
+async function openTelegram(msg, sender) {
+  let url = null;
+  let query = null;
+  if (typeof msg.url === "string" && TG_MSG_URL.test(msg.url)) url = msg.url;
+  else if (typeof msg.query === "string" && msg.query.trim() && msg.query.length <= 500) query = msg.query;
+  else return false;
+
+  const hash = url ? "#?tgaddr=" + encodeURIComponent(url) : "";
+  const stashQuery = () => api.storage.local.set({ tgSearch: { query, ts: Date.now() } });
+
+  const tabs = await api.tabs.query({ url: TG_WEB + "*" });
+  const winId = sender && sender.tab && sender.tab.windowId;
+  const tab = tabs.find((t) => t.windowId === winId) || tabs[0];
+
+  if (!tab) {
+    if (query) await stashQuery(); // telegram.js picks it up when the new tab has loaded
+    await api.tabs.create({ url: TG_WEB + hash });
+    return true;
+  }
+
+  // navigate by changing the hash only: Telegram Web handles ?tgaddr= without reloading
+  const upd = { active: true };
+  if (url) {
+    const u = new URL(tab.url);
+    u.hash = hash;
+    upd.url = u.toString();
+  }
+  await api.tabs.update(tab.id, upd);
+  try { await api.windows.update(tab.windowId, { focused: true }); } catch {}
+
+  if (query) {
+    // the page is already loaded, so ask telegram.js to run the search right now
+    let handled = false;
+    try { handled = !!(await api.tabs.sendMessage(tab.id, { type: "kkafio-tg-search", query })); } catch {}
+    if (!handled) { // telegram.js isn't running there (e.g. tab predates an extension reload)
+      await stashQuery();
+      await api.tabs.reload(tab.id);
+    }
+  }
+  return true;
+}
+
+api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg && msg.type === "kkafio-open-tg") {
+    openTelegram(msg, sender).then(sendResponse, (e) => { console.warn("KKAFIO: openTelegram failed", e); sendResponse(false); });
+    return true;
+  }
+});

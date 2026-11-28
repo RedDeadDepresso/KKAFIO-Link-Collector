@@ -16,7 +16,8 @@
     "https://*.pximg.net/*",
     "https://reddeaddepresso.github.io/*",
     "*://kk.now.cc/*",
-    "*://*.kk.now.cc/*"
+    "*://*.kk.now.cc/*",
+    "*://web.telegram.org/*"
   ],
   "action": {
     "default_popup": "popup.html",
