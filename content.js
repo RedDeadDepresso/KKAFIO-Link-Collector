@@ -464,6 +464,7 @@ function makeBtn(url, floating) {
 // images (in page coordinates, so they scroll smoothly with the page). We never modify the site's own elements (that breaks React pages).
 const tracked = new Map(); // anchor -> button
 const trackedKK = new Map(); // anchor -> "KK" badge (pixiv only, see kk.js)
+const trackedTG = new Map(); // anchor -> "TG" badge: the post was seen in a Telegram chat (pixiv only)
 const urlCache = new Map();
 let overlay;
 
@@ -534,6 +535,8 @@ function removeUI() {
   tracked.clear();
   trackedKK.forEach((b) => b.remove());
   trackedKK.clear();
+  trackedTG.forEach((b) => b.remove());
+  trackedTG.clear();
   if (site.kk) KK.removePanel();
   document.querySelectorAll(".lc-float").forEach((b) => b.remove());
   if (overlay) overlay.remove();
@@ -545,6 +548,7 @@ function update() {
   const vw = innerWidth, vh = innerHeight, M = 400; // render a bit beyond the viewport
   const seen = new Set();
   const seenKK = new Set();
+  const seenTG = new Set();
   const clipCache = new Map(); // ancestor -> clip rect (or null), per pass
   // The overlay scrolls with the page, so buttons are placed relative to it
   // (page coordinates) and the browser moves them natively while scrolling.
@@ -622,6 +626,22 @@ function update() {
         if (kb._y !== ky) { kb.style.top = ky + "px"; kb._y = ky; }
         seenKK.add(a);
       }
+      // ... and posts that were seen in a Telegram chat (right of the KK badge, if there is one)
+      const tgHref = KK.tgPostHref(KK.postId(url));
+      if (tgHref) {
+        let tb = trackedTG.get(a);
+        if (!tb || !tb.isConnected || tb.dataset.kk !== tgHref) {
+          if (tb) tb.remove();
+          tb = KK.makeTgBadge(tgHref);
+          ov.appendChild(tb);
+          trackedTG.set(a, tb);
+        }
+        const tx = Math.round(r.left - o.left + 6 + (href ? 34 : 0));
+        const ty = Math.round(r.bottom - o.top - 26);
+        if (tb._x !== tx) { tb.style.left = tx + "px"; tb._x = tx; }
+        if (tb._y !== ty) { tb.style.top = ty + "px"; tb._y = ty; }
+        seenTG.add(a);
+      }
     }
   });
   for (const [a, b] of tracked) {
@@ -629,6 +649,9 @@ function update() {
   }
   for (const [a, b] of trackedKK) {
     if (!seenKK.has(a)) { b.remove(); trackedKK.delete(a); }
+  }
+  for (const [a, b] of trackedTG) {
+    if (!seenTG.has(a)) { b.remove(); trackedTG.delete(a); }
   }
 
   // floating button on the post page itself

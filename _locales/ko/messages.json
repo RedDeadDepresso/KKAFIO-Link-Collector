@@ -53,6 +53,15 @@
   "kkPost": {
     "message": "게시물"
   },
+  "kkTgPost": {
+    "message": "채팅의 게시물"
+  },
+  "kkTgUser": {
+    "message": "채팅의 작가"
+  },
+  "kkTgBadge": {
+    "message": "텔레그램 채팅에서 확인됨"
+  },
   "kkTelegram": {
     "message": "검색"
   }

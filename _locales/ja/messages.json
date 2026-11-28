@@ -53,6 +53,15 @@
   "kkPost": {
     "message": "投稿"
   },
+  "kkTgPost": {
+    "message": "チャットの投稿"
+  },
+  "kkTgUser": {
+    "message": "チャットのアーティスト"
+  },
+  "kkTgBadge": {
+    "message": "Telegramチャットで確認済み"
+  },
   "kkTelegram": {
     "message": "検索"
   }

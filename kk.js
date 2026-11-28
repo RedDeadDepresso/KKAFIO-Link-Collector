@@ -7,6 +7,9 @@
 //   posts:   [pixiv post ids present on koikatsucards]
 //   authors: { koikatsucards author slug: display name }
 //   users:   { pixiv user id: { authors: [slug], bepis: [name], pawchive: {service, id} } }
+//   telegram (optional): { posts: { pixiv post id: path }, users: { pixiv user id: path } }
+//            where path is the t.me link path of the first Telegram message that links it:
+//            "name/123", "c/1234567890/123" or, in a forum topic, "name/42/123"
 const KK = (() => {
   const DEFAULT_URLS = {
     post: "https://koikatsucards.com/contents/pixiv-{id}",
@@ -17,11 +20,13 @@ const KK = (() => {
   // The file comes from the network, so it may never point links anywhere else.
   const ALLOWED_URL = /^https:\/\/(?:koikatsucards\.com|db\.bepis\.moe|pawchive\.pw)\//;
   const TELEGRAM_URL = "https://web.telegram.org/k/";
+  // The file comes from the network: only a plain t.me message path is turned into a link.
+  const TG_PATH = /^(?:c\/\d{1,20}|[A-Za-z][A-Za-z0-9_]{3,31})(?:\/\d{1,10}){1,2}$/;
   const LANG = "(?:[a-z]{2}(?:_[a-z]{2})?\\/)?";
   const ARTWORK_PATH = new RegExp("^\\/" + LANG + "artworks\\/(\\d+)");
   const USER_PATH = new RegExp("^\\/" + LANG + "users\\/(\\d+)");
 
-  const st = { ready: false, posts: new Set(), users: {}, authors: {}, urls: { ...DEFAULT_URLS } };
+  const st = { ready: false, posts: new Set(), users: {}, authors: {}, urls: { ...DEFAULT_URLS }, tgPosts: new Map(), tgUsers: new Map() };
   const artistCache = new Map(); // artwork id -> pixiv user id (string) or null
   const userNameCache = new Map(); // pixiv user id -> display name or null
   const pending = new Set();
@@ -45,9 +50,23 @@ const KK = (() => {
       if (typeof v === "string" && ALLOWED_URL.test(v)) urls[k] = v;
     }
     st.urls = urls;
+    st.tgPosts = tgPaths(lookup.telegram && lookup.telegram.posts);
+    st.tgUsers = tgPaths(lookup.telegram && lookup.telegram.users);
     st.ready = true;
     return true;
   }
+
+  // { id: path } -> Map of the entries that are digits -> a valid t.me message path
+  function tgPaths(obj) {
+    const m = new Map();
+    if (!obj || typeof obj !== "object") return m;
+    for (const k of Object.keys(obj)) {
+      const v = obj[k];
+      if (/^\d+$/.test(k) && typeof v === "string" && TG_PATH.test(v)) m.set(k, v);
+    }
+    return m;
+  }
+  const tgHref = (path) => "https://t.me/" + path.split("/").map(encodeURIComponent).join("/");
 
   function load() {
     chrome.storage.local.get({ lookup: null }, (d) => {
@@ -69,6 +88,11 @@ const KK = (() => {
     return id && st.posts.has(id) ? fill(st.urls.post, { id }) : null;
   }
 
+  // link to the Telegram message where the pixiv post (id: number) was seen, or null
+  function tgPostHref(id) {
+    return id && st.tgPosts.has(String(id)) ? tgHref(st.tgPosts.get(String(id))) : null;
+  }
+
   function makeBadge(href) {
     const a = document.createElement("a");
     a._lc = true;
@@ -79,6 +103,14 @@ const KK = (() => {
     a.rel = "noopener noreferrer";
     a.title = "koikatsucards.com";
     a.textContent = "KK";
+    return a;
+  }
+
+  function makeTgBadge(href) {
+    const a = makeBadge(href);
+    a.classList.add("kk-badge-tg");
+    a.title = t("kkTgBadge");
+    a.textContent = "TG";
     return a;
   }
 
@@ -132,7 +164,9 @@ const KK = (() => {
     if (art) {
       const href = postHref(Number(art[1]));
       if (href) items.push({ tag: "KK", text: t("kkPost"), href, title: "koikatsucards.com" });
-      if (Object.keys(st.users).length) {
+      const tgPost = tgPostHref(Number(art[1]));
+      if (tgPost) items.push({ tag: "Telegram", text: t("kkTgPost"), href: tgPost, title: "t.me" });
+      if (Object.keys(st.users).length || st.tgUsers.size) {
         userId = artistCache.get(art[1]);
         if (userId === undefined) requestArtist(art[1]);
       }
@@ -160,6 +194,9 @@ const KK = (() => {
           title: "pawchive.pw",
         });
       }
+    }
+    if (userId && st.tgUsers.has(userId)) {
+      items.push({ tag: "Telegram", text: t("kkTgUser"), href: tgHref(st.tgUsers.get(userId)), title: "t.me" });
     }
     // Telegram + KKnow: search for this Pixiv page's link (works without lookup.json)
     if (art || usr) {
@@ -218,6 +255,6 @@ const KK = (() => {
   return {
     ready: () => st.ready,
     onChange: (fn) => { onChangeCb = fn; },
-    load, ingest, postId, postHref, makeBadge, syncPanel, removePanel,
+    load, ingest, postId, postHref, tgPostHref, makeBadge, makeTgBadge, syncPanel, removePanel,
   };
 })();

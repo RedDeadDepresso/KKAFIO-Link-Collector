@@ -12,12 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Gofile folders: a **+** collect button on every file row (links are saved as `gofile.io/d/CODE#FILEID`).
 - koikatsucards.com: hides ads (including the home page ad carousel and ad slots), blocks pop-under tabs, and no longer adds a **+** to ad links.
 - Pixiv: thumbnails of posts that exist on koikatsucards.com get a small **KK** badge linking to the post.
+- Pixiv: thumbnails of posts that were seen in a Telegram chat get a small **TG** badge (next to the **KK** badge) linking to the Telegram message.
 - Telegram Web (`web.telegram.org/k/`): a **+** button next to channel and supergroup messages collects the message link (`t.me/username/id`, or `t.me/c/channelid/id` when the username is not known); press again to remove it (`telegram-collect.js`).
 - Pixiv artwork and artist pages: links to the artist's koikatsucards.com author page, Bepis author page(s) and Pawchive creator, when they are known.
 - Pixiv artwork and artist pages: **Telegram** and **KKnow** search chips.
   - On artwork pages they search for the post link (`pixiv.net/artworks/ID`); on artist pages they search for the artist's name.
   - **KKnow** opens `kknow.cc/search/search/?keywords=…&order=date` in a new tab.
   - **Telegram** opens Telegram Web (`web.telegram.org/k/`) and types the search into its search box (Telegram Web can't be searched through a URL, so a small script, `telegram.js`, does it once the page has loaded).
+- Pixiv artwork and artist pages: a **Telegram** chip linking to the message where the post, or the artist, was seen in a Telegram chat.
 - [kk-authors](https://reddeaddepresso.github.io/kk-authors/): the **Telegram** buttons on author cards open Telegram Web with the author's name, or their Telegram tag, already typed into the search box (`authors-site.js`). Without the extension the buttons simply open Telegram Web.
 - The lookup data (`lookup.json`, from [kk-author-scraper](https://github.com/RedDeadDepresso/kk-author-scraper)) is downloaded in the background at most twice a day and stored locally.
 - Pixiv images (`pximg.net`) shown on [kk-authors](https://reddeaddepresso.github.io/kk-authors/) are no longer blocked: the extension sets the `Referer` header to `https://www.pixiv.net/` for those image requests only.

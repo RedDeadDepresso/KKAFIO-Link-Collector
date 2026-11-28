@@ -53,6 +53,15 @@
   "kkPost": {
     "message": "作品"
   },
+  "kkTgPost": {
+    "message": "聊天中的作品"
+  },
+  "kkTgUser": {
+    "message": "聊天中的作者"
+  },
+  "kkTgBadge": {
+    "message": "在 Telegram 聊天中出現過"
+  },
   "kkTelegram": {
     "message": "搜尋"
   }

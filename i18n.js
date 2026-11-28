@@ -17,6 +17,9 @@ const KKAFIO_FALLBACK = {
   "collectedFloat": "✓ Collected",
   "badgeDup": "dup",
   "kkPost": "Post",
+  "kkTgPost": "Post in chat",
+  "kkTgUser": "Artist in chat",
+  "kkTgBadge": "Seen in a Telegram chat",
   "kkTelegram": "Search"
 };
 
